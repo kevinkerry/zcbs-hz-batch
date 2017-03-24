@@ -1,5 +1,7 @@
 package com.zcbspay.platform.hz.batch.common.dao;
 
+import com.zcbspay.platform.hz.batch.bean.PayPartyBean;
+
 
 
 /**

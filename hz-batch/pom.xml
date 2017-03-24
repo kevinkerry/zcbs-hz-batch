@@ -272,5 +272,6 @@
     <module>hz-batch-application-api</module>
     <module>hz-batch-application</module>
     <module>hz-batch-application-simple</module>
+    <module>hz-batch-test</module>
   </modules>
 </project>
