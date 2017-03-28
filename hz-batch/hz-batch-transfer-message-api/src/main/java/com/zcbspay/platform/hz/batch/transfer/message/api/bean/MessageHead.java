@@ -1,7 +1,13 @@
 package com.zcbspay.platform.hz.batch.transfer.message.api.bean;
 
-public class MessageHead {
+import java.io.Serializable;
 
+public class MessageHead implements Serializable{
+
+	/**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = -5622583193956054649L;
 	/**
 	 * 报文类型
 	 */

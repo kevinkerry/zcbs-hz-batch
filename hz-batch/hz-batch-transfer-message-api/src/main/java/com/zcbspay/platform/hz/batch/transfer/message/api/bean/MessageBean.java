@@ -1,11 +1,18 @@
 package com.zcbspay.platform.hz.batch.transfer.message.api.bean;
 
+import java.io.Serializable;
+
 import com.zcbspay.platform.hz.batch.transfer.message.api.enums.MessageTypeEnum;
 
 
-public class MessageBean {
+public class MessageBean implements Serializable{
 
-    private MessageTypeEnum messageTypeEnum;
+    /**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = 1814629421235030743L;
+
+	private MessageTypeEnum messageTypeEnum;
 
     private Object messageBean;
 

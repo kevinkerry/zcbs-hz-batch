@@ -26,7 +26,7 @@ import com.zcbspay.platform.hz.batch.transfer.message.api.enums.MessageTypeEnum;
  * @date 2017年3月21日 下午4:28:18
  * @since
  */
-@Service
+@Service("messageAssemble")
 public class MessageAssembleImpl implements MessageAssemble{
 
 	@Override

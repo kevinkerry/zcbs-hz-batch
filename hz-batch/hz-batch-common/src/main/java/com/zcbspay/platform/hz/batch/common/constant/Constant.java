@@ -52,7 +52,7 @@ public class Constant {
                     try {
                         refresh();
                         int interval = NumberUtils.toInt(refresh_interval, 60) * 1000;// 刷新间隔，单位：秒
-                        log.info("refresh Constant datetime:" + DateUtil.getCurrentDateTime());
+                       // log.info("refresh Constant datetime:" + DateUtil.getCurrentDateTime());
                         Thread.sleep(interval);
                     }
                     catch (Exception e) {

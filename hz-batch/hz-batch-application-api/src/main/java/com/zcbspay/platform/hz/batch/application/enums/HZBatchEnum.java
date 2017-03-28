@@ -19,13 +19,10 @@ public enum HZBatchEnum {
 	 */
 	SIGNOUT("TAG_005"),
 	/**
-	 * 下载代收对账文件
+	 * 下载对账文件
 	 */
-	DOWNLOAD_COLLECT("TAG_006"),
-	/**
-	 * 下载代付对账文件
-	 */
-	DOWNLOAD_PAYMENT("TAG_007"),
+	DOWNLOAD_BILL("TAG_006"),
+	
 	/**
 	 * 代收协议签约
 	 */

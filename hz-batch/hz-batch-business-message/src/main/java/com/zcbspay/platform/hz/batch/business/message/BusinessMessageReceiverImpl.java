@@ -30,8 +30,7 @@ import com.zcbspay.platform.hz.batch.pojo.ChnAgreementDO;
 
 
 
-@Service
-@com.alibaba.dubbo.config.annotation.Service(version="1.0",retries=0)
+@Service("businessMessageReceiver")
 public class BusinessMessageReceiverImpl implements BusinessMessageReceiver {
 
 	@Autowired

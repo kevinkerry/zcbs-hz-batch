@@ -20,7 +20,7 @@ import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageBean;
 import com.zcbspay.platform.hz.batch.transfer.message.api.enums.MessageTypeEnum;
 import com.zcbspay.platform.hz.batch.transfer.message.api.unpack.MessageUnpack;
 
-@Service
+@Service("messageUnpack")
 public class MessageUnpackImpl implements MessageUnpack {
 
 	@Reference(version="1.0")

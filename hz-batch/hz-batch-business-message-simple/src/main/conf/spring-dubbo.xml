@@ -5,5 +5,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 	<!-- <dubbo:service interface="com.zcbspay.platform.payment.fee.service.TradeFeeService" ref="tradeFeeService" retries="0" version="1.0" timeout="60000"/> -->
-	<dubbo:annotation package="com.zcbspay.platform.hz.batch.business.message"/>
+	<dubbo:annotation package="com.zcbspay.platform.hz.batch"/>
+	<dubbo:service interface="com.zcbspay.platform.hz.batch.business.message.api.BusinessMessageReceiver" ref="businessMessageReceiver" retries="0" version="1.0" timeout="60000"/> 
+	<dubbo:service interface="com.zcbspay.platform.hz.batch.business.message.api.BusinesssMessageSender" ref="businesssMessageSender" retries="0" version="1.0" timeout="60000"/>
 </beans>

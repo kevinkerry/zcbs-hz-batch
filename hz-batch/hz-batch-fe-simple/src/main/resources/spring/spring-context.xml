@@ -18,9 +18,6 @@
 	 <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
         <property name="locations">  
            <list>  
-              <!-- 推荐使用file的方式引入，这样可以将配置和代码分离   -->
-             <!--  <value>file:D:/cert/*.properties</value> 
-              <value>file:/home/web/trade/config/*.properties</value>  -->
               <value>classpath:*.properties</value>  
             </list>  
         </property>  

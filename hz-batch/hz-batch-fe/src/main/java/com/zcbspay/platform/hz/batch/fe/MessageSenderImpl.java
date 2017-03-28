@@ -7,8 +7,7 @@ import com.zcbspay.platform.hz.batch.fe.api.MessageSender;
 import com.zcbspay.platform.hz.batch.fe.enums.MessageTypeEnum;
 import com.zcbspay.platform.hz.batch.transfer.message.api.unpack.MessageUnpack;
 
-@Service
-@com.alibaba.dubbo.config.annotation.Service(version="1.0",retries=0)
+@Service("messageSender")
 public class MessageSenderImpl implements MessageSender {
 
 	@Reference(version="1.0")

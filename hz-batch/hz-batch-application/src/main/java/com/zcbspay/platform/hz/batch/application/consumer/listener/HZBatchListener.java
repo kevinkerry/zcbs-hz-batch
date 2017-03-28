@@ -22,7 +22,7 @@ import com.zcbspay.platform.hz.batch.business.message.api.bean.ProtocolSignBean;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.ResultBean;
 
 
-@Service("hzRealTimeListener")
+@Service("hzBatchListener")
 public class HZBatchListener implements MessageListenerConcurrently{
 	private static final Logger log = LoggerFactory.getLogger(HZBatchListener.class);
 	private static final ResourceBundle RESOURCE = ResourceBundle.getBundle("producer_hz_batch");
@@ -39,9 +39,9 @@ public class HZBatchListener implements MessageListenerConcurrently{
 		String json = null;
 		for (MessageExt msg : msgs) {
 			ResultBean resultBean = null;
-			if (msg.getTopic().equals(RESOURCE.getString("hz.realtime.subscrib"))) {
+			if (msg.getTopic().equals(RESOURCE.getString("hz.batch.subscribe"))) {
 				HZBatchEnum hzBatchEnum = HZBatchEnum.fromValue(msg.getTags());
-				if(hzBatchEnum == HZBatchEnum.BATCH_PAYMENT){//批量代收
+				if(hzBatchEnum == HZBatchEnum.BATCH_COLLECT){//批量代收
 					json = new String(msg.getBody(), Charsets.UTF_8);
 					log.info("接收到的MSG:" + json);
 					log.info("接收到的MSGID:" + msg.getMsgId());
@@ -50,7 +50,13 @@ public class HZBatchListener implements MessageListenerConcurrently{
 						log.warn("MSGID:{}JSON转换后为NULL,无法生成订单数据,原始消息数据为{}",msg.getMsgId(), json);
 						break;
 					}
-					resultBean = concentrateTradeService.batchCollection(tradeBean);
+					try {
+						resultBean = concentrateTradeService.batchCollection(tradeBean);
+					} catch (Throwable e) {
+						// TODO: handle exception
+						resultBean = new ResultBean("09", e.getMessage());
+					}
+					
 					
 				}else if(hzBatchEnum == HZBatchEnum.BATCH_PAYMENT){//批量代付
 					json = new String(msg.getBody(), Charsets.UTF_8);
@@ -61,9 +67,13 @@ public class HZBatchListener implements MessageListenerConcurrently{
 						log.warn("MSGID:{}JSON转换后为NULL,无法生成订单数据,原始消息数据为{}",msg.getMsgId(), json);
 						break;
 					}
-					resultBean = concentrateTradeService.batchPayment(tradeBean);
-					
-				}else if(hzBatchEnum == HZBatchEnum.DOWNLOAD_BILL){
+					try {
+						resultBean = concentrateTradeService.batchPayment(tradeBean);
+					} catch (Throwable e) {
+						// TODO: handle exception
+						resultBean = new ResultBean("09", e.getMessage());
+					}
+				}else if(hzBatchEnum == HZBatchEnum.DOWNLOAD_BILL){//下载对账文件
 					json = new String(msg.getBody(), Charsets.UTF_8);
 					log.info("接收到的MSG:" + json);
 					log.info("接收到的MSGID:" + msg.getMsgId());
@@ -72,7 +82,12 @@ public class HZBatchListener implements MessageListenerConcurrently{
 						log.warn("MSGID:{}JSON转换后为NULL,无法生成订单数据,原始消息数据为{}",msg.getMsgId(), json);
 						break;
 					}
-					resultBean = concentrateTradeService.downLoadBill(tradeBean);
+					try {
+						resultBean = concentrateTradeService.downLoadBill(tradeBean);
+					} catch (Throwable e) {
+						// TODO: handle exception
+						resultBean = new ResultBean("09", e.getMessage());
+					}
 				}else if(hzBatchEnum == HZBatchEnum.SIGNIN){
 					json = new String(msg.getBody(), Charsets.UTF_8);
 					log.info("接收到的MSG:" + json);
@@ -82,7 +97,12 @@ public class HZBatchListener implements MessageListenerConcurrently{
 						log.warn("MSGID:{}JSON转换后为NULL,无法生成订单数据,原始消息数据为{}",msg.getMsgId(), json);
 						break;
 					}
-					resultBean = concentrateTradeService.signInOrOut(tradeBean);
+					try {
+						resultBean = concentrateTradeService.signInOrOut(tradeBean);
+					} catch (Throwable e) {
+						// TODO: handle exception
+						resultBean = new ResultBean("09", e.getMessage());
+					}
 				}else if(hzBatchEnum == HZBatchEnum.SIGNOUT){
 					json = new String(msg.getBody(), Charsets.UTF_8);
 					log.info("接收到的MSG:" + json);
@@ -92,7 +112,12 @@ public class HZBatchListener implements MessageListenerConcurrently{
 						log.warn("MSGID:{}JSON转换后为NULL,无法生成订单数据,原始消息数据为{}",msg.getMsgId(), json);
 						break;
 					}
-					resultBean = concentrateTradeService.signInOrOut(tradeBean);
+					try {
+						resultBean = concentrateTradeService.signInOrOut(tradeBean);
+					} catch (Throwable e) {
+						// TODO: handle exception
+						resultBean = new ResultBean("09", e.getMessage());
+					}
 				}else if(hzBatchEnum == HZBatchEnum.PROTOCOL_DOWNLOAD){
 					json = new String(msg.getBody(), Charsets.UTF_8);
 					log.info("接收到的MSG:" + json);
@@ -102,7 +127,12 @@ public class HZBatchListener implements MessageListenerConcurrently{
 						log.warn("MSGID:{}JSON转换后为NULL,无法生成订单数据,原始消息数据为{}",msg.getMsgId(), json);
 						break;
 					}
-					resultBean = concentrateTradeService.protocolDownLoad(tradeBean);
+					try {
+						resultBean = concentrateTradeService.protocolDownLoad(tradeBean);
+					} catch (Throwable e) {
+						// TODO: handle exception
+						resultBean = new ResultBean("09", e.getMessage());
+					}
 				}else if(hzBatchEnum == HZBatchEnum.PROTOCOLSIGN){
 					json = new String(msg.getBody(), Charsets.UTF_8);
 					log.info("接收到的MSG:" + json);
@@ -113,7 +143,12 @@ public class HZBatchListener implements MessageListenerConcurrently{
 						log.warn("MSGID:{}JSON转换后为NULL,无法生成订单数据,原始消息数据为{}",msg.getMsgId(), json);
 						break;
 					}
-					resultBean = concentrateTradeService.protocolSign(parseArray);
+					try {
+						resultBean = concentrateTradeService.protocolSign(parseArray);
+					} catch (Throwable e) {
+						// TODO: handle exception
+						resultBean = new ResultBean("09", e.getMessage());
+					}
 				}
 			}
 			concentrateCacheResultService.saveInsteadPayResult(KEY, JSON.toJSONString(resultBean));

@@ -50,8 +50,7 @@ import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageBean;
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageHead;
 import com.zcbspay.platform.hz.batch.transfer.message.api.enums.MessageTypeEnum;
 
-@Service
-@com.alibaba.dubbo.config.annotation.Service(version="1.0",retries=0)
+@Service("businesssMessageSender")
 public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 
 	@Reference(version="1.0")
@@ -150,6 +149,8 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			chnCollectDeta.setAddinfo(cmt031Bean.getAdditionContent());
 			chnCollectDeta.setTxnseqno(detaBean.getTxnseqno());
 			collectDetaList.add(chnCollectDeta);
+			
+			//PayPartyBean payPartyBean = new PayPartyBean();
 		}
 		chnCollectDetaDAO.saveBatchCollectDeta(collectDetaList);
 		messageBean.setMessageBean(msgList);

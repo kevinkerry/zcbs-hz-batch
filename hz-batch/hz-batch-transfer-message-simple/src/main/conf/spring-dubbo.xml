@@ -6,4 +6,6 @@
 	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 	<!-- <dubbo:service interface="com.zcbspay.platform.payment.fee.service.TradeFeeService" ref="tradeFeeService" retries="0" version="1.0" timeout="60000"/> -->
 	<dubbo:annotation package="com.zcbspay.platform.hz.batch.transfer.message"/>
+	<dubbo:service interface="com.zcbspay.platform.hz.batch.transfer.message.api.assemble.MessageAssemble" ref="messageAssemble" retries="0" version="1.0" timeout="60000"/>
+	<dubbo:service interface="com.zcbspay.platform.hz.batch.transfer.message.api.unpack.MessageUnpack" ref="messageUnpack" retries="0" version="1.0" timeout="60000"/>
 </beans>

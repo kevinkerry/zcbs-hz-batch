@@ -77,6 +77,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		batchBean.setMerchNo(orderCollectBatch.getMerid());
 		batchBean.setTotalAmt(orderCollectBatch.getTotalamt()+"");
 		batchBean.setTotalCount(orderCollectBatch.getTotalqty()+"");
+		batchBean.setDetaList(detaList);
 		ResultBean resultBean = businesssMessageSender.batchCollectionCharges(batchBean);
 		return resultBean;
 	}
@@ -108,6 +109,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		paymentBean.setMerchNo(paymentBatchOrder.getMerid());
 		paymentBean.setTotalAmt(paymentBatchOrder.getTotalamt()+"");
 		paymentBean.setTotalCount(paymentBatchOrder.getTotalqty()+"");
+		paymentBean.setDetaList(detaList);
 		ResultBean resultBean = businesssMessageSender.batchPayment(paymentBean);
 		return resultBean;
 	}
