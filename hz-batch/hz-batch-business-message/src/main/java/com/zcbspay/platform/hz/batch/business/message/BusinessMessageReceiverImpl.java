@@ -3,11 +3,17 @@ package com.zcbspay.platform.hz.batch.business.message;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
+import com.zcbspay.platform.hz.batch.bean.PayPartyBean;
 import com.zcbspay.platform.hz.batch.business.message.api.BusinessMessageReceiver;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.MessageTypeEnum;
+import com.zcbspay.platform.hz.batch.business.message.dao.ChnCollectDetaDAO;
+import com.zcbspay.platform.hz.batch.business.message.dao.ChnPaymentBatchDAO;
+import com.zcbspay.platform.hz.batch.business.message.dao.ChnPaymentDetaDAO;
 import com.zcbspay.platform.hz.batch.business.message.dao.ChnProtcolDownLogDAO;
 import com.zcbspay.platform.hz.batch.business.message.dao.ChnReconDownLogDAO;
 import com.zcbspay.platform.hz.batch.business.message.dao.ChnSignInOutLogDAO;
@@ -16,16 +22,19 @@ import com.zcbspay.platform.hz.batch.business.message.pojo.ChnProtcolDownLogDO;
 import com.zcbspay.platform.hz.batch.business.message.pojo.ChnReconDownLogDO;
 import com.zcbspay.platform.hz.batch.business.message.pojo.ChnSignInOutLogDO;
 import com.zcbspay.platform.hz.batch.business.message.pojo.ChnTxnDO;
+import com.zcbspay.platform.hz.batch.common.constant.Constant;
 import com.zcbspay.platform.hz.batch.common.utils.DateUtil;
 import com.zcbspay.platform.hz.batch.dao.ChnAgreementDAO;
+import com.zcbspay.platform.hz.batch.dao.TxnsLogDAO;
+import com.zcbspay.platform.hz.batch.enums.BusinessEnum;
 import com.zcbspay.platform.hz.batch.message.bean.CollectBillBean;
 import com.zcbspay.platform.hz.batch.message.bean.MessageHead;
 import com.zcbspay.platform.hz.batch.message.bean.PaymentBillBean;
 import com.zcbspay.platform.hz.batch.message.bean.ProtocolDetaBean;
-import com.zcbspay.platform.hz.batch.message.bean.request.GMT031Bean;
 import com.zcbspay.platform.hz.batch.message.bean.response.AUT032RSPBean;
 import com.zcbspay.platform.hz.batch.message.bean.response.DLD032RSPBean;
 import com.zcbspay.platform.hz.batch.message.bean.response.DLD037RSPBean;
+import com.zcbspay.platform.hz.batch.message.bean.response.GMT031RSPBean;
 import com.zcbspay.platform.hz.batch.pojo.ChnAgreementDO;
 
 
@@ -43,12 +52,21 @@ public class BusinessMessageReceiverImpl implements BusinessMessageReceiver {
 	private ChnProtcolDownLogDAO chnProtcolDownLogDAO;
 	@Autowired
 	private ChnAgreementDAO chnAgreementDAO;
+	@Autowired
+	private ChnCollectDetaDAO chnCollectDetaDAO;
+	@Autowired
+	private TxnsLogDAO txnsLogDAO;
+	@Autowired
+	private ChnPaymentDetaDAO chnPaymentDetaDAO;
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
+	private static final String HZ_SIGN_STATUS = "PARAMETER:HZSIGNSTATUS";
 	@Override
 	public void signInAndSignOut(MessageBean messageBean) {
 		ChnSignInOutLogDO chnSignInOutLog = new ChnSignInOutLogDO();
-		GMT031Bean gmt031Bean = (GMT031Bean) messageBean.getMessageBean();
-		MessageHead messageHead = new MessageHead();
-		chnSignInOutLog.setMsgtype(messageHead .getMsgType());
+		GMT031RSPBean gmt031Bean = (GMT031RSPBean) messageBean.getMessageBean();
+		MessageHead messageHead = gmt031Bean.getMessageHead();
+		chnSignInOutLog.setMsgtype(messageHead.getMsgType());
 		chnSignInOutLog.setServicetype(messageHead.getServiceType());
 		chnSignInOutLog.setTransmitleg(messageHead.getSenderCode());
 		chnSignInOutLog.setReceiver(messageHead.getReceiverCode());
@@ -61,8 +79,14 @@ public class BusinessMessageReceiverImpl implements BusinessMessageReceiver {
 		chnSignInOutLog.setSigntime(gmt031Bean.getSignInTime());
 		chnSignInOutLog.setSigntype(gmt031Bean.getSignInType());
 		chnSignInOutLogDAO.saveSignInOutLog(chnSignInOutLog);
-		
 		//redis中加入签到状态
+		signStatus(gmt031Bean.getSignInType());
+	}
+	
+	private void signStatus(String signType){
+		ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
+		//1：签到  0：签退
+		opsForValue.set(HZ_SIGN_STATUS, signType);
 	}
 
 	@Override
@@ -146,7 +170,16 @@ public class BusinessMessageReceiverImpl implements BusinessMessageReceiver {
 				chnTxn.setSettledate(collectBillBean.getSettDate());
 				chnTxn.setSettlestatus(collectBillBean.getSettFlag());
 				chnTxn.setLogid(reconDownLog.getTid());
+				chnTxn.setInstiid(Constant.getInstance().getChannelCode());
 				chnTxnDAO.saveChnTxn(chnTxn);
+				//更新渠道交易表
+				chnCollectDetaDAO.updateCollectDetaResult(collectBillBean);
+				//更新核心交易流水表
+				PayPartyBean payPartyBean = new PayPartyBean();
+				payPartyBean.setPayretcode(collectBillBean.getRspCode());
+				payPartyBean.setPayordno(collectBillBean.getTxId());
+				payPartyBean.setBusinessEnum(BusinessEnum.CONCENTRATE_COLLECT_BATCH);
+				txnsLogDAO.updatePayInfoResult(payPartyBean);
 			}
 		}else if(messageBean.getMessageTypeEnum()==MessageTypeEnum.DLD037){//代付对账处理
 			DLD037RSPBean dld037rspBean = (DLD037RSPBean) messageBean.getMessageBean();
@@ -181,7 +214,16 @@ public class BusinessMessageReceiverImpl implements BusinessMessageReceiver {
 				chnTxn.setSettledate(paymentBillBean.getSettDate());
 				chnTxn.setSettlestatus(paymentBillBean.getSettFlag());
 				chnTxn.setLogid(reconDownLog.getTid());
+				chnTxn.setInstiid(Constant.getInstance().getChannelCode());
 				chnTxnDAO.saveChnTxn(chnTxn);
+				//更新渠道交易表
+				chnPaymentDetaDAO.updatePaymentDetaResult(paymentBillBean);
+				//更新核心交易流水表
+				PayPartyBean payPartyBean = new PayPartyBean();
+				payPartyBean.setPayretcode(paymentBillBean.getRspCode());
+				payPartyBean.setPayordno(paymentBillBean.getTxId());
+				payPartyBean.setBusinessEnum(BusinessEnum.CONCENTRATE_PAYMENT_BATCH);
+				txnsLogDAO.updatePayInfoResult(payPartyBean);
 			}
 		}
 	}

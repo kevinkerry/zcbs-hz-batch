@@ -37,9 +37,6 @@ public class ConcentrateCacheResultServiceImpl implements ConcentrateCacheResult
 	 */
 	@Override
 	public void saveInsteadPayResult(String key, String json) {
-		// TODO Auto-generated method stub
-		/*ValueOperations<String, Object> opsForValue = redisTemplate.opsForValue();
-		opsForValue.set(key, json, 10, TimeUnit.MINUTES);*/
 		BoundListOperations<String, Object> boundListOps = redisTemplate.boundListOps(key);
 		boundListOps.leftPush(json);
 	}

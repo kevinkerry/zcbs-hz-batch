@@ -12,6 +12,8 @@ package com.zcbspay.platform.hz.batch.bean;
 
 import java.io.Serializable;
 
+import com.zcbspay.platform.hz.batch.enums.BusiTypeEnum;
+import com.zcbspay.platform.hz.batch.enums.BusinessEnum;
 import com.zcbspay.platform.hz.batch.enums.ChnlTypeEnum;
 
 /**
@@ -24,7 +26,11 @@ import com.zcbspay.platform.hz.batch.enums.ChnlTypeEnum;
  */
 public class PayPartyBean implements Serializable{
     
-    private String txnseqno;//交易序列号
+    /**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = -517057628757980562L;
+	private String txnseqno;//交易序列号
     private String paytype;//支付类型（01：快捷，02：网银，03：账户）
     private String payordno;//支付定单号
     private String payinst;//支付所属机构
@@ -33,10 +39,6 @@ public class PayPartyBean implements Serializable{
     private String payordcomtime;//支付定单提交时间
     private String payordfintime;//支付定单完成时间
     private String cardNo;//交易卡号
-    
-    private String rout;//路由
-    private String routlvl;//路由版本
-    
     private String payrettsnseqno;
     private String payretcode;
     private String payretinfo;
@@ -45,6 +47,7 @@ public class PayPartyBean implements Serializable{
     private String panName;
     
     private ChnlTypeEnum chnlTypeEnum;
+    private BusinessEnum businessEnum; 
     /**
      * @return the paytype
      */
@@ -156,30 +159,7 @@ public class PayPartyBean implements Serializable{
     }
     
     
-    /**
-     * @return the rout
-     */
-    public String getRout() {
-        return rout;
-    }
-    /**
-     * @param rout the rout to set
-     */
-    public void setRout(String rout) {
-        this.rout = rout;
-    }
-    /**
-     * @return the routlvl
-     */
-    public String getRoutlvl() {
-        return routlvl;
-    }
-    /**
-     * @param routlvl the routlvl to set
-     */
-    public void setRoutlvl(String routlvl) {
-        this.routlvl = routlvl;
-    }
+    
     /**
      * @param txnseqno
      * @param paytype
@@ -305,6 +285,13 @@ public class PayPartyBean implements Serializable{
 	public void setChnlTypeEnum(ChnlTypeEnum chnlTypeEnum) {
 		this.chnlTypeEnum = chnlTypeEnum;
 	}
+	public BusinessEnum getBusinessEnum() {
+		return businessEnum;
+	}
+	public void setBusinessEnum(BusinessEnum businessEnum) {
+		this.businessEnum = businessEnum;
+	}
+	
     
     
     

@@ -1,6 +1,8 @@
 package com.zcbspay.platform.hz.batch.message.bean;
 
-public class ProtocolDetaBean {
+import java.io.Serializable;
+
+public class ProtocolDetaBean implements Serializable{
 	/**
 	 * 操作类型
 	 */

@@ -31,6 +31,7 @@ public class Constant {
     private String senderCode;
     private String receiverCode;
     private String operatorCode;
+    private String channelCode;
     private boolean canRun;
     private String refresh_interval;
     private static Constant constant;
@@ -78,6 +79,7 @@ public class Constant {
             senderCode = prop.getProperty("sender_code");
             receiverCode = prop.getProperty("receiver_code");
             operatorCode = prop.getProperty("operator_code");
+            channelCode = prop.getProperty("channel_code");
             canRun = true;
             refresh_interval = prop.getProperty("refresh_interval");
         }
@@ -129,6 +131,18 @@ public class Constant {
 
 	public void setOperatorCode(String operatorCode) {
 		this.operatorCode = operatorCode;
+	}
+
+	public String getChannelCode() {
+		return channelCode;
+	}
+
+	public void setChannelCode(String channelCode) {
+		this.channelCode = channelCode;
+	}
+
+	public static Logger getLog() {
+		return log;
 	}
 
 }

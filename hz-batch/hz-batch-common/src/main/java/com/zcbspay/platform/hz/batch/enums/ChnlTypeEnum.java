@@ -28,6 +28,7 @@ public enum ChnlTypeEnum {
     BOSSPAY("BOSS"),
     CHANPAY("CHAN"),
     WECHAT("WECHAT"),
+    HZ("HZ"),
     UNKNOW("99");
    private String tradeType;
     

@@ -1,6 +1,12 @@
 package com.zcbspay.platform.hz.batch.business.message.api.bean;
 
-public class ProtocolSignBean {
+import java.io.Serializable;
+
+public class ProtocolSignBean implements Serializable{
+	/**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = 518021374836643468L;
 	/**
 	 * 操作类型
 	 */

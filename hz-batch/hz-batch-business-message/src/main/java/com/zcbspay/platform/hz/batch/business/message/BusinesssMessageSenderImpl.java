@@ -3,10 +3,13 @@ package com.zcbspay.platform.hz.batch.business.message;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.google.common.collect.Lists;
+import com.zcbspay.platform.hz.batch.bean.PayPartyBean;
 import com.zcbspay.platform.hz.batch.business.message.api.BusinesssMessageSender;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.BatchCollectionChargesBean;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.BatchPaymentBean;
@@ -37,6 +40,8 @@ import com.zcbspay.platform.hz.batch.business.message.sequence.TradeSequenceServ
 import com.zcbspay.platform.hz.batch.common.constant.Constant;
 import com.zcbspay.platform.hz.batch.common.utils.DateUtil;
 import com.zcbspay.platform.hz.batch.dao.ChnAgreementDAO;
+import com.zcbspay.platform.hz.batch.dao.TxnsLogDAO;
+import com.zcbspay.platform.hz.batch.enums.TradeStatFlagEnum;
 import com.zcbspay.platform.hz.batch.fe.api.MessageSender;
 import com.zcbspay.platform.hz.batch.message.bean.request.AUT031Bean;
 import com.zcbspay.platform.hz.batch.message.bean.request.AUT032Bean;
@@ -52,10 +57,12 @@ import com.zcbspay.platform.hz.batch.transfer.message.api.enums.MessageTypeEnum;
 
 @Service("businesssMessageSender")
 public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
-
+	
+	private static final String HZ_SIGN_STATUS = "PARAMETER:HZSIGNSTATUS";
 	@Reference(version="1.0")
 	private MessageAssemble messageAssemble;
-	
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private TradeSequenceService tradeSequenceService;
 	@Autowired
@@ -78,6 +85,8 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	private ChnAgreementDAO chnAgreementDAO;
 	@Autowired
 	private ChnTxnDAO chnTxnDAO;
+	@Autowired
+	private TxnsLogDAO txnsLogDAO;
 	@Autowired
 	private ChnReconDownLogDAO chnReconDownLogDAO;
 	@Reference(version="1.0")
@@ -149,8 +158,11 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			chnCollectDeta.setAddinfo(cmt031Bean.getAdditionContent());
 			chnCollectDeta.setTxnseqno(detaBean.getTxnseqno());
 			collectDetaList.add(chnCollectDeta);
-			
-			//PayPartyBean payPartyBean = new PayPartyBean();
+			PayPartyBean payPartyBean = new PayPartyBean();
+			payPartyBean.setPayordno(cmt031Bean.getTxId());
+			payPartyBean.setTxnseqno(detaBean.getTxnseqno());
+			txnsLogDAO.updatePayInfo(payPartyBean);
+			txnsLogDAO.updateTradeStatFlag(detaBean.getTxnseqno(), TradeStatFlagEnum.PAYING);
 		}
 		chnCollectDetaDAO.saveBatchCollectDeta(collectDetaList);
 		messageBean.setMessageBean(msgList);
@@ -222,6 +234,11 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			chnCollectDeta.setAdditionallen(cmt036Bean.getAdditionLength());
 			chnCollectDeta.setTxnseqno(detaBean.getTxnseqno());
 			paymentDetaList.add(chnCollectDeta);
+			PayPartyBean payPartyBean = new PayPartyBean();
+			payPartyBean.setPayordno(cmt036Bean.getTxId());
+			payPartyBean.setTxnseqno(detaBean.getTxnseqno());
+			txnsLogDAO.updatePayInfo(payPartyBean);
+			txnsLogDAO.updateTradeStatFlag(detaBean.getTxnseqno(), TradeStatFlagEnum.PAYING);
 		}
 		chnPaymentDetaDAO.saveBatchPaymentDeta(paymentDetaList);
 		messageBean.setMessageBean(msgList);
@@ -232,6 +249,9 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	}
 	@Override
 	public ResultBean signInAndSignOut(String operateType) {
+		if(checkSignStatus()){
+			return new ResultBean("", "已签到");
+		}
 		GMT031Bean gmt031Bean = new GMT031Bean();
 		gmt031Bean.setSignInCode(Constant.getInstance().getSenderCode());
 		gmt031Bean.setSignInDate(DateUtil.getCurrentDate());
@@ -265,6 +285,17 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		String message = messageAssemble.assemble(messageBean);
 		messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
 		return null;
+	}
+	
+	private boolean checkSignStatus(){
+		ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
+		String signStatus = opsForValue.get(HZ_SIGN_STATUS);
+		//1：签到  0：签退
+		if("1".equals(signStatus)){
+			return true;
+		}else{
+			return false;
+		}
 	}
 
 	@Override

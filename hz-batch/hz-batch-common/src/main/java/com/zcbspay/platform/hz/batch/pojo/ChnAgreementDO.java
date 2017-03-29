@@ -4,7 +4,10 @@ package com.zcbspay.platform.hz.batch.pojo;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 /**
@@ -64,6 +67,8 @@ public class ChnAgreementDO implements java.io.Serializable {
 	}
 
 	@Id
+	@GeneratedValue(strategy=GenerationType.SEQUENCE,generator="seq_chn_agreement") 
+	@SequenceGenerator(name="seq_chn_agreement",sequenceName="SEQ_CHN_AGREEMENT",allocationSize=1)
 	@Column(name = "TID", unique = true, nullable = false, precision = 12, scale = 0)
 	public long getTid() {
 		return this.tid;

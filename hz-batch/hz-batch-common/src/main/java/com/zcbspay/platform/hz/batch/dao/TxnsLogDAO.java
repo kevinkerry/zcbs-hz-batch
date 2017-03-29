@@ -54,11 +54,7 @@ public interface TxnsLogDAO extends BaseDAO<TxnsLogDO>{
 	 */
 	public void updateTradeStatFlag(String txnseqno,
 			TradeStatFlagEnum tradeStatFlagEnum);
-	/**
-	 * 更新支付交易交易数据（支付后）
-	 * @param payPartyBean 支付方数据bean
-	 */
-	public void updateCMBCTradeData(PayPartyBean payPartyBean);
+	
 	
 	/**
 	 * 获取银行卡信息
@@ -74,17 +70,14 @@ public interface TxnsLogDAO extends BaseDAO<TxnsLogDO>{
 	public void updateAppInfo(String txnseqno);
 	
 	/**
-	 * 更新民生代付退汇结果
-	 * @param txnseqno 交易序列号
-	 * @param retCode 应答码
-	 * @param retMsg 应答信息
-	 */
-	public void updateCMBCReexchange(String txnseqno,String retCode,String retMsg);
-	
-	/**
 	 * 保存交易日志
 	 * @param txnsLog 交易日志pojo
 	 */
 	public void saveTxnsLog(TxnsLogDO txnsLog);
 	
+	/**
+	 * 更新支付方交易结果
+	 * @param payPartyBean
+	 */
+	public void updatePayInfoResult(PayPartyBean payPartyBean);
 }

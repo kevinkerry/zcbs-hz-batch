@@ -24,9 +24,9 @@ public class ApplicationTest extends BaseTest {
 	@Test
 	public void test(){
 		//批量代收
-		//test_batch_collect("170316061000000050");
+		//test_batch_collect("170315061000000049");
 		//批量代付
-		//test_batch_payment("170315061000000048");
+		test_batch_payment("170315061000000048");
 		//下载对账文件
 		//test_download_bill("20170327","01");
 		//签到签退
@@ -34,13 +34,23 @@ public class ApplicationTest extends BaseTest {
 		//协议下载
 		//test_protocol_downLoad("1000000001","20170207","1");
 		//协议签约
-		test_protocol_sign();
+		//test_protocol_sign();
 	}
 	
 	private void test_protocol_sign() {
 		try {
 			ProtocolSignBean protocolSignBean = new ProtocolSignBean();
 			List<ProtocolSignBean> protocolList = Lists.newArrayList();
+			protocolSignBean.setOperateType("1");
+			protocolSignBean.setDebtorUnitCode("1000000001");
+			protocolSignBean.setDelegationCode("000000000001");
+			protocolSignBean.setSignDate("20170325");
+			protocolSignBean.setMeteringCode("00001");
+			protocolSignBean.setMeteringName("TEST");
+			protocolSignBean.setDebtorBranchNo("203121000010");
+			protocolSignBean.setDebtorAccountNo("6228480018543668979");
+			protocolSignBean.setDebtorName("测试账户1");
+			protocolSignBean.setDebtorAddress("北京");
 			protocolList.add(protocolSignBean);
 			HZBatchEnum hzBatch = HZBatchEnum.PROTOCOLSIGN;
 			SendResult sendResult = hzBatchSpringProducer.sendJsonMessage(JSON.toJSONString(protocolList), hzBatch);

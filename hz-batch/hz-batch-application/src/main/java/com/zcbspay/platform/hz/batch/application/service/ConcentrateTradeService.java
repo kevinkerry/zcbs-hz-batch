@@ -2,6 +2,7 @@ package com.zcbspay.platform.hz.batch.application.service;
 
 import java.util.List;
 
+import com.zcbspay.platform.hz.batch.application.exception.HZBatchApplicationException;
 import com.zcbspay.platform.hz.batch.application.service.bean.TradeBean;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.ProtocolSignBean;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.ResultBean;
@@ -12,15 +13,17 @@ public interface ConcentrateTradeService {
 	 * 批量代收
 	 * @param tradeBean
 	 * @return
+	 * @throws HZBatchApplicationException 
 	 */
-	public ResultBean batchCollection(TradeBean tradeBean);
+	public ResultBean batchCollection(TradeBean tradeBean) throws HZBatchApplicationException;
 	
 	/**
 	 * 批量代付
 	 * @param tradeBean
 	 * @return
+	 * @throws HZBatchApplicationException 
 	 */
-	public ResultBean batchPayment(TradeBean tradeBean);
+	public ResultBean batchPayment(TradeBean tradeBean) throws HZBatchApplicationException;
 	/**
 	 * 签到签退
 	 * @param tradeBean

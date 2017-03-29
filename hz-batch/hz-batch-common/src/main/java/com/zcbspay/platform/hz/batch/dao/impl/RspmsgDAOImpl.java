@@ -58,9 +58,9 @@ public class RspmsgDAOImpl  extends HibernateBaseDAOImpl<RspmsgDO> implements Rs
         List<RspmsgDO> result = null;
         String  queryString = null;
         if(chnlType==null){
-        	queryString = "from PojoRspmsg where chnlrspcode=?";
+        	queryString = "from RspmsgDO where chnlrspcode=?";
         }else{
-        	queryString = "from PojoRspmsg where chnltype=? and chnlrspcode=?";
+        	queryString = "from RspmsgDO where chnltype=? and chnlrspcode=?";
         }
         try {
             log.info("getRspmsgByChnlCode() queryString:"+queryString);

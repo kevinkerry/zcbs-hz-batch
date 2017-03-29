@@ -20,6 +20,7 @@ public class ChnAgreementDAOImpl extends HibernateBaseDAOImpl<ChnAgreementDO> im
 		Criteria criteria = getSession().createCriteria(ChnAgreementDO.class);
 		criteria.add(Restrictions.eq("chargingunit", chargingunit));
 		criteria.add(Restrictions.eq("debtoraccountno", debtoraccountno));
+		criteria.add(Restrictions.eq("status", "00"));
 		ChnAgreementDO uniqueResult = (ChnAgreementDO) criteria.uniqueResult();
 		return uniqueResult;
 	}
@@ -32,6 +33,7 @@ public class ChnAgreementDAOImpl extends HibernateBaseDAOImpl<ChnAgreementDO> im
 	}
 
 	@Override
+	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Throwable.class)
 	public void updateAgreement(ChnAgreementDO chnAgreement) {
 		// TODO Auto-generated method stub
 		update(chnAgreement);

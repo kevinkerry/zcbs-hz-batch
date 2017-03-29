@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.google.common.collect.Lists;
+import com.zcbspay.platform.hz.batch.application.exception.HZBatchApplicationException;
 import com.zcbspay.platform.hz.batch.application.service.ConcentrateTradeService;
 import com.zcbspay.platform.hz.batch.application.service.bean.TradeBean;
 import com.zcbspay.platform.hz.batch.business.message.api.BusinesssMessageSender;
@@ -48,13 +50,24 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 	@Reference(version="1.0") 
 	private MerchService merchService;
 	@Override
-	public ResultBean batchCollection(TradeBean tradeBean) {
+	public ResultBean batchCollection(TradeBean tradeBean) throws HZBatchApplicationException {
 		BatchCollectionChargesBean batchBean = new BatchCollectionChargesBean();
 		List<CollectionChargesDetaBean> detaList = Lists.newArrayList();
 		OrderCollectBatchDO orderCollectBatch = orderCollectBatchDAO.getCollectBatchOrderByTn(tradeBean.getTn());
+		if("00".equals(orderCollectBatch.getStatus())){//状态为待支付才能进行交易
+			throw new HZBatchApplicationException("HZB001");
+		}else if(!"01".equals(orderCollectBatch.getStatus())){
+			throw new HZBatchApplicationException("HZB002");
+		}
 		List<OrderCollectDetaDO> detaOrderList = orderCollectDetaDAO.getDetaListByBatchtid(orderCollectBatch.getTid());
 		MerchantBean merchantBean = merchService.getMerchBymemberId(orderCollectBatch.getMerid());
+		if(StringUtils.isEmpty(merchantBean.getChargingunit())){
+			throw new HZBatchApplicationException("HZB005");
+		}
 		for(OrderCollectDetaDO collectDeta : detaOrderList){
+			if(!"01".equals(collectDeta.getStatus())){//状态不是待支付的交易忽略
+				continue;
+			}
 			CollectionChargesDetaBean detaBean = new CollectionChargesDetaBean();
 			detaBean.setDebtorUnitCode(merchantBean.getChargingunit());//从商户表中获取，暂时没有此字段,查询处理
 			detaBean.setCommitDate(DateUtil.getCurrentDate());
@@ -83,12 +96,20 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 	}
 
 	@Override
-	public ResultBean batchPayment(TradeBean tradeBean) {
+	public ResultBean batchPayment(TradeBean tradeBean) throws HZBatchApplicationException {
 		BatchPaymentBean paymentBean = new BatchPaymentBean();
 		List<PaymentDetaBean> detaList = Lists.newArrayList();
 		OrderPaymentBatchDO paymentBatchOrder = orderPaymentBatchDAO.getPaymentBatchOrderByTn(tradeBean.getTn());
+		if("00".equals(paymentBatchOrder.getStatus())){//状态为待支付才能进行交易
+			throw new HZBatchApplicationException("HZB003");
+		}else if(!"01".equals(paymentBatchOrder.getStatus())){
+			throw new HZBatchApplicationException("HZB004");
+		}
 		List<OrderPaymentDetaDO> orderList = orderPaymentDetaDAO.getDetaListByBatchtid(paymentBatchOrder.getTid());
 		MerchantBean merchantBean = merchService.getMerchBymemberId(paymentBatchOrder.getMerid());
+		if(StringUtils.isEmpty(merchantBean.getChargingunit())){
+			throw new HZBatchApplicationException("HZB005");
+		}
 		for(OrderPaymentDetaDO orderDeta : orderList){
 			PaymentDetaBean detaBean = new PaymentDetaBean();
 			detaBean.setDebtorUnitCode(merchantBean.getChargingunit());

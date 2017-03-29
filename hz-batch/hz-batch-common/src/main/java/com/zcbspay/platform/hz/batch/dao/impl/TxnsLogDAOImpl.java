@@ -27,13 +27,16 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zcbspay.platform.hz.batch.bean.PayPartyBean;
+import com.zcbspay.platform.hz.batch.common.constant.Constant;
 import com.zcbspay.platform.hz.batch.common.dao.impl.HibernateBaseDAOImpl;
 import com.zcbspay.platform.hz.batch.common.utils.DateUtil;
 import com.zcbspay.platform.hz.batch.common.utils.UUIDUtil;
 import com.zcbspay.platform.hz.batch.dao.RspmsgDAO;
 import com.zcbspay.platform.hz.batch.dao.TxnsLogDAO;
+import com.zcbspay.platform.hz.batch.enums.BusinessEnum;
 import com.zcbspay.platform.hz.batch.enums.ChnlTypeEnum;
 import com.zcbspay.platform.hz.batch.enums.TradeStatFlagEnum;
+import com.zcbspay.platform.hz.batch.enums.TradeTxnFlagEnum;
 import com.zcbspay.platform.hz.batch.pojo.RspmsgDO;
 import com.zcbspay.platform.hz.batch.pojo.TxnsLogDO;
 
@@ -84,18 +87,14 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<TxnsLogDO> implements
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void updatePayInfo(PayPartyBean payPartyBean) {
-		String hql = "update TxnsLogDO set paytype=?,payordno=?,payinst=?,payfirmerno=?,payordcomtime=?,payrettsnseqno=? where txnseqno=?";
+		String hql = "update TxnsLogDO set payordno=?,payinst=?,payfirmerno=?,payordcomtime=? where txnseqno=?";
 		Query query = getSession().createQuery(hql);
-		Object[] paramaters = new Object[] {
-				StringUtils.isNotEmpty(payPartyBean.getPaytype()) ? payPartyBean
-						.getPaytype() : "01", payPartyBean.getPayordno(),
-				payPartyBean.getPayinst(), payPartyBean.getPayfirmerno(),
-				payPartyBean.getPayordcomtime(),
-				payPartyBean.getPayrettsnseqno(), payPartyBean.getTxnseqno() };
-
-		for (int i = 0; i < paramaters.length; i++) {
-			query.setParameter(i, paramaters[i]);
-		}
+		query.setParameter(0, payPartyBean.getPayordno());
+		query.setParameter(1, Constant.getInstance().getChannelCode());
+		query.setParameter(2, Constant.getInstance().getSenderCode());
+		query.setParameter(3, DateUtil.getCurrentDateTime());
+		
+		query.setParameter(4, payPartyBean.getTxnseqno());
 		int rows = query.executeUpdate();
 		log.info("updatePayInfo() effect rows:" + rows);
 	}
@@ -111,57 +110,7 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<TxnsLogDO> implements
 		log.info("updateTradeStatFlag() effect rows:" + rows);
 	}
 	
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public void updateCMBCTradeData(PayPartyBean payPartyBean){
-		Object[] paramaters = null;
-        String hql = "update TxnsLogDO set paytype=?,payordno=?,payinst=?,payfirmerno=?,payordcomtime=?,payrettsnseqno=?,payretcode=?,payretinfo=?,retcode=?,retinfo=?,tradestatflag=?,payordfintime=?, retdatetime=?,tradetxnflag=?,relate=?,tradeseltxn=? where txnseqno=?";
-        Query query = getSession().createQuery(hql);
-	    try {
-	        RspmsgDO msg = rspmsgDAO.getRspmsgByChnlCode(ChnlTypeEnum.CMBCWITHHOLDING,payPartyBean.getPayretcode().trim());
-	        paramaters = new Object[]{
-	        		StringUtils.isNotEmpty(payPartyBean.getPaytype())?payPartyBean.getPaytype():"01",
-					payPartyBean.getPayordno(),
-					payPartyBean.getPayinst(),
-					payPartyBean.getPayfirmerno(),
-					payPartyBean.getPayordcomtime(),
-				    payPartyBean.getPayrettsnseqno(),
-				    payPartyBean.getPayretcode().trim(),
-				    payPartyBean.getPayretinfo().trim(),
-				    msg.getWebrspcode(),msg.getRspinfo(),
-	        		"0000".equals(msg.getWebrspcode())?TradeStatFlagEnum.FINISH_SUCCESS.getStatus():TradeStatFlagEnum.FINISH_FAILED.getStatus(),
-	        		DateUtil.getCurrentDateTime(),
-	        		DateUtil.getCurrentDateTime(),
-	        		"10000000",
-	        		"10000000",
-	        		UUIDUtil.uuid(),
-	        		payPartyBean.getTxnseqno()};
-	    } catch (Exception e) {
-	        paramaters = new Object[]{
-	        		StringUtils.isNotEmpty(payPartyBean.getPaytype())?payPartyBean.getPaytype():"01",
-					payPartyBean.getPayordno(),
-					payPartyBean.getPayinst(),
-					payPartyBean.getPayfirmerno(),
-					payPartyBean.getPayordcomtime(),
-				    payPartyBean.getPayrettsnseqno(),
-				    payPartyBean.getPayretcode().trim(),
-				    payPartyBean.getPayretinfo().trim(),
-				    payPartyBean.getPayretcode().trim(),
-				    payPartyBean.getPayretinfo().trim(),
-	        		TradeStatFlagEnum.FINISH_FAILED.getStatus(),
-	        		DateUtil.getCurrentDateTime(),
-	        		DateUtil.getCurrentDateTime(),
-	        		"10000000",
-	        		"10000000",
-	        		UUIDUtil.uuid(),
-	        		payPartyBean.getTxnseqno()};
-	    }
-	    for (int i = 0; i < paramaters.length; i++) {
-			query.setParameter(i, paramaters[i]);
-		}
-		int rows = query.executeUpdate();
-		log.info("updateCMBCTradeData() effect rows:" + rows);
-	}
+	
 
 	/**
 	 *
@@ -209,20 +158,7 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<TxnsLogDO> implements
 		 int rows = query.executeUpdate();
 		 log.info("updateAppInfo() effect rows:" + rows);
 	}
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public void updateCMBCReexchange(String txnseqno,String retCode,String retMsg){
-		String hql = "update TxnsLogDO set payretcode = ?,payretinfo = ?,retcode = ?,retinfo = ? where txnseqno = ?";
-		 Query query = getSession().createQuery(hql);
-		 query.setParameter(0, retCode);
-		 query.setParameter(1, retMsg);
-		 query.setParameter(2, "02HH");
-		 query.setParameter(3, "交易失败");
-		 query.setParameter(4, txnseqno);
-		 int rows = query.executeUpdate();
-		 log.info("updateAppInfo() effect rows:" + rows);
-	}
-
+	
 	/**
 	 *
 	 * @param txnsLog
@@ -233,5 +169,34 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<TxnsLogDO> implements
 		saveEntity(txnsLog);
 	}
 
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	public void updatePayInfoResult(PayPartyBean payPartyBean) {
+		RspmsgDO rspmsg = rspmsgDAO.getRspmsgByChnlCode(ChnlTypeEnum.HZ, payPartyBean.getPayretcode());
+		if(rspmsg==null){
+			rspmsg = new RspmsgDO();
+			rspmsg.setRspinfo("未知异常");
+		}
+		String hql = "update TxnsLogDO set payordfintime = ?, payretcode = ?, payretinfo = ?, accordfintime = ?,retdatetime=?,tradetxnflag=?,tradestatflag = ?,relate=?,tradeseltxn=?  where payordno=?";
+		Query query = getSession().createQuery(hql);
+		query.setParameter(0, DateUtil.getCurrentDateTime());
+		query.setParameter(1, payPartyBean.getPayretcode());
+		query.setParameter(2, rspmsg.getRspinfo());
+		query.setParameter(3, DateUtil.getCurrentDateTime());
+		query.setParameter(4, DateUtil.getCurrentDateTime());
+		if(BusinessEnum.CONCENTRATE_COLLECT_BATCH==payPartyBean.getBusinessEnum()){
+			query.setParameter(5, TradeTxnFlagEnum.HZ_BATCH_COLLECT.getCode());
+		}else if(BusinessEnum.CONCENTRATE_PAYMENT_BATCH==payPartyBean.getBusinessEnum()){
+			query.setParameter(5, TradeTxnFlagEnum.HZ_BATCH_PAYMENT.getCode());
+		}
+		query.setParameter(6, TradeStatFlagEnum.FINISH_SUCCESS.getStatus());
+		query.setParameter(7, "10000000");
+		query.setParameter(8, UUIDUtil.uuid());
+		query.setParameter(9, payPartyBean.getPayordno());
+		int rows = query.executeUpdate();
+		log.info("updatePayInfo() effect rows:" + rows);
+		
+	}
+	
 	
 }
