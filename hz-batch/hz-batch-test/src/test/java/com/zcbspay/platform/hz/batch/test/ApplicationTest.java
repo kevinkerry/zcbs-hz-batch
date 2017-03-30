@@ -12,6 +12,7 @@ import com.alibaba.rocketmq.client.exception.MQClientException;
 import com.alibaba.rocketmq.client.producer.SendResult;
 import com.alibaba.rocketmq.remoting.exception.RemotingException;
 import com.google.common.collect.Lists;
+import com.zcbspay.platform.hz.batch.application.bean.ResultBean;
 import com.zcbspay.platform.hz.batch.application.enums.HZBatchEnum;
 import com.zcbspay.platform.hz.batch.application.interfaces.Producer;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.ProtocolSignBean;
@@ -24,9 +25,9 @@ public class ApplicationTest extends BaseTest {
 	@Test
 	public void test(){
 		//批量代收
-		//test_batch_collect("170315061000000049");
+		test_batch_collect("170330061000000018");
 		//批量代付
-		test_batch_payment("170315061000000048");
+		//test_batch_payment("170330061000000021");
 		//下载对账文件
 		//test_download_bill("20170327","01");
 		//签到签退
@@ -117,6 +118,8 @@ public class ApplicationTest extends BaseTest {
 			tradeBean.setTn(tn);
 			SendResult sendResult = hzBatchSpringProducer.sendJsonMessage(JSON.toJSONString(tradeBean), hzBatch);
 			System.out.println(JSON.toJSONString(sendResult));
+			ResultBean queryReturnResult = hzBatchSpringProducer.queryReturnResult(sendResult);
+			System.out.println(JSON.toJSONString(queryReturnResult));
 		} catch (MQClientException | RemotingException | InterruptedException
 				| MQBrokerException e) {
 			// TODO Auto-generated catch block
@@ -131,6 +134,8 @@ public class ApplicationTest extends BaseTest {
 			tradeBean.setTn(tn);
 			SendResult sendResult = hzBatchSpringProducer.sendJsonMessage(JSON.toJSONString(tradeBean), hzBatch);
 			System.out.println(JSON.toJSONString(sendResult));
+			ResultBean queryReturnResult = hzBatchSpringProducer.queryReturnResult(sendResult);
+			System.out.println(JSON.toJSONString(queryReturnResult));
 		} catch (MQClientException | RemotingException | InterruptedException
 				| MQBrokerException e) {
 			// TODO Auto-generated catch block

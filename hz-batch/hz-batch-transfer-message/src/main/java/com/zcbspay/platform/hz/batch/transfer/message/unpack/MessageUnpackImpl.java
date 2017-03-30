@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.google.common.collect.Lists;
 import com.zcbspay.platform.hz.batch.business.message.api.BusinessMessageReceiver;
+import com.zcbspay.platform.hz.batch.business.message.exception.HZBatchBusinessMessageException;
 import com.zcbspay.platform.hz.batch.common.utils.BeanCopyUtil;
 import com.zcbspay.platform.hz.batch.message.bean.CollectBillBean;
 import com.zcbspay.platform.hz.batch.message.bean.MessageHead;
@@ -33,34 +34,39 @@ public class MessageUnpackImpl implements MessageUnpack {
 		String body = message.substring(52);
 		MessageHead messageHead = new MessageHead(head);
 		MessageTypeEnum messageTypeEnum = MessageTypeEnum.valueOf(messageHead.getMsgType());
-		switch (messageTypeEnum) {
-			case AUT031:
-				
-				break;
-			case AUT032://协议下载
-				messageBean = createAUT032(body,messageHead);
-				businessMessageReceiver.downloadProtocol(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
-				break;
-			case CMT031://签到 报文体一条，长度43
-				messageBean = createCMT031(body,messageHead);
-				businessMessageReceiver.signInAndSignOut(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
-				break;
-			case CMT036:
+		try {
+			switch (messageTypeEnum) {
+				case AUT031:
+					
+					break;
+				case AUT032://协议下载
+					messageBean = createAUT032(body,messageHead);
+					businessMessageReceiver.downloadProtocol(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
+					break;
+				case CMT031://签到 报文体一条，长度43
+					messageBean = createCMT031(body,messageHead);
+					businessMessageReceiver.signInAndSignOut(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
+					break;
+				case CMT036:
 
-				break;
-			case DLD032://代收对账文件
-				messageBean = createDLD032(body,messageHead);
-				businessMessageReceiver.downLoadBill(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
-				break;
-			case DLD037://代付对账文件
-				messageBean =createDLD037(body,messageHead);
-				businessMessageReceiver.downLoadBill(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
-				break;
-			case GMT031:
-				
-				break;
-			default:
-				break;
+					break;
+				case DLD032://代收对账文件
+					messageBean = createDLD032(body,messageHead);
+					businessMessageReceiver.downLoadBill(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
+					break;
+				case DLD037://代付对账文件
+					messageBean =createDLD037(body,messageHead);
+					businessMessageReceiver.downLoadBill(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
+					break;
+				case GMT031:
+					
+					break;
+				default:
+					break;
+			}
+		} catch (HZBatchBusinessMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return messageBean;
 	}

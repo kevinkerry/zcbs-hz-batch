@@ -6,6 +6,7 @@ import com.zcbspay.platform.hz.batch.business.message.api.bean.BatchCollectionCh
 import com.zcbspay.platform.hz.batch.business.message.api.bean.BatchPaymentBean;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.ProtocolSignBean;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.ResultBean;
+import com.zcbspay.platform.hz.batch.business.message.exception.HZBatchBusinessMessageException;
 
 /**
  * 
@@ -23,21 +24,21 @@ public interface BusinesssMessageSender {
 	 * @param collectionChargesBean
 	 * @return
 	 */
-	public ResultBean batchCollectionCharges(BatchCollectionChargesBean collectionChargesBean);
+	public ResultBean batchCollectionCharges(BatchCollectionChargesBean collectionChargesBean) throws HZBatchBusinessMessageException ;
 	
 	/**
 	 * 批量代付
 	 * @param paymentBean
 	 * @return
 	 */
-	public ResultBean batchPayment(BatchPaymentBean paymentBean);
+	public ResultBean batchPayment(BatchPaymentBean paymentBean) throws HZBatchBusinessMessageException;
 	
 	/**
 	 * 签到或者签退
 	 * @param operateType 01:签到 02:签退
 	 * @return
 	 */
-	public ResultBean signInAndSignOut(String operateType);
+	public ResultBean signInAndSignOut(String operateType) throws HZBatchBusinessMessageException;
 	
 	/**
 	 * 
@@ -45,14 +46,14 @@ public interface BusinesssMessageSender {
 	 * @param operateType 01:代收 02:代付
 	 * @return
 	 */
-	public ResultBean downLoadBill(String billDate,String operateType);
+	public ResultBean downLoadBill(String billDate,String operateType) throws HZBatchBusinessMessageException;
 	
 	/**
 	 * 
 	 * @param protocolList
 	 * @return
 	 */
-	public ResultBean protocolSign(List<ProtocolSignBean> protocolList);
+	public ResultBean protocolSign(List<ProtocolSignBean> protocolList) throws HZBatchBusinessMessageException;
 	
 	/**
 	 * 下载签约协议
@@ -61,5 +62,5 @@ public interface BusinesssMessageSender {
 	 * @param downLoadType
 	 * @return
 	 */
-	public ResultBean downloadProtocol(String debtorUnitCode,String signDate,String downLoadType);
+	public ResultBean downloadProtocol(String debtorUnitCode,String signDate,String downLoadType) throws HZBatchBusinessMessageException;
 }

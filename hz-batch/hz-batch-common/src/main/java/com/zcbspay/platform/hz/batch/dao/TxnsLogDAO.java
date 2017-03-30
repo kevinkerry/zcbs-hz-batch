@@ -80,4 +80,11 @@ public interface TxnsLogDAO extends BaseDAO<TxnsLogDO>{
 	 * @param payPartyBean
 	 */
 	public void updatePayInfoResult(PayPartyBean payPartyBean);
+	
+	/**
+	 * 通过支付订单号获取交易流水数据
+	 * @param payordno
+	 * @return
+	 */
+	public TxnsLogDO getTxnsLogByPayOrder(String payordno);
 }

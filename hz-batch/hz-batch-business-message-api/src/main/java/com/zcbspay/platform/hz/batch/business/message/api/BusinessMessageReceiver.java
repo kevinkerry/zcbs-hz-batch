@@ -1,6 +1,7 @@
 package com.zcbspay.platform.hz.batch.business.message.api;
 
 import com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean;
+import com.zcbspay.platform.hz.batch.business.message.exception.HZBatchBusinessMessageException;
 
 
 /**
@@ -17,19 +18,19 @@ public interface BusinessMessageReceiver {
 	 * 处理签到签退应答报文处理
 	 * @param message
 	 */
-   public void signInAndSignOut(MessageBean messageBean);
+   public void signInAndSignOut(MessageBean messageBean) throws HZBatchBusinessMessageException;
 
    /**
     * 下载协议应答报文处理
     * @param messageBean
     */
-   public void downloadProtocol(MessageBean messageBean);
+   public void downloadProtocol(MessageBean messageBean) throws HZBatchBusinessMessageException;
 
    /**
     * 下载对账应答报文处理
     * @param messageBean
     */
-   public void downLoadBill(MessageBean messageBean);
+   public void downLoadBill(MessageBean messageBean) throws HZBatchBusinessMessageException;
 
     
 

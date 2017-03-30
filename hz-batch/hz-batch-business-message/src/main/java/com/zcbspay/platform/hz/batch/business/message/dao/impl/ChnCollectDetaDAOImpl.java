@@ -46,7 +46,8 @@ public class ChnCollectDetaDAOImpl extends HibernateBaseDAOImpl<ChnCollectDetaDO
 		int rows = query.executeUpdate();
 		logger.info("hql:{},effect rows:{}",hql,rows);
 	}
-
+	
+	
 	
 
 }

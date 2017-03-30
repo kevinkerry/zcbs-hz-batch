@@ -13,5 +13,15 @@ public interface OrderPaymentBatchDAO extends BaseDAO<OrderPaymentBatchDO> {
 	 */
 	public OrderPaymentBatchDO getPaymentBatchOrderByTn(String tn);
 	
+	/**
+	 * 更新批次订单状态为支付完成
+	 * @param tn
+	 */
 	public void updateOrderToSuccess(String tn);
+
+	/**
+	 * 更新订单状态为交易中
+	 * @param tn
+	 */
+	public void updateOrderToPay(String tn);
 }

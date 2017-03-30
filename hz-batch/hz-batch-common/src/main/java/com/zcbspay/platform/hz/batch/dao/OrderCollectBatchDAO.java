@@ -14,7 +14,13 @@ public interface OrderCollectBatchDAO extends BaseDAO<OrderCollectBatchDO> {
 	
 	/**
      * 更新订单状态为成功
-     * @param tn 受理批次号
+     * @param tid 受理批次主键
      */
-    public void updateOrderToSuccess(String tn) ;
+    public void updateOrderToSuccess(long tid) ;
+    
+    /**
+     * 更新批次状态为正在交易中
+     * @param tn
+     */
+    public void updateOrderToPay(String tn);
 }

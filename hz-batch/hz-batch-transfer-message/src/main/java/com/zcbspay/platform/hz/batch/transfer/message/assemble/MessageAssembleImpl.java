@@ -17,6 +17,7 @@ import com.zcbspay.platform.hz.batch.transfer.message.api.assemble.MessageAssemb
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageBean;
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageHead;
 import com.zcbspay.platform.hz.batch.transfer.message.api.enums.MessageTypeEnum;
+import com.zcbspay.platform.hz.batch.transfer.message.exception.HZBatchTransferMessageException;
 /**
  * 
  * Class Description
@@ -30,7 +31,7 @@ import com.zcbspay.platform.hz.batch.transfer.message.api.enums.MessageTypeEnum;
 public class MessageAssembleImpl implements MessageAssemble{
 
 	@Override
-	public MessageHead createMessageHead(MessageBean bean) {
+	public MessageHead createMessageHead(MessageBean bean) throws HZBatchTransferMessageException{
 		
 		MessageTypeEnum messageType = bean.getMessageTypeEnum();
 		//报文头赋值
@@ -114,7 +115,7 @@ public class MessageAssembleImpl implements MessageAssemble{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String signature(MessageBean bean) {
+	public String signature(MessageBean bean)  throws HZBatchTransferMessageException {
 		MessageTypeEnum messageType = bean.getMessageTypeEnum();
 		StringBuffer msgBuffer = new StringBuffer();
 		switch (messageType){
@@ -163,7 +164,7 @@ public class MessageAssembleImpl implements MessageAssemble{
 	}
 
 	@Override
-	public String assemble(MessageBean messageBean) {
+	public String assemble(MessageBean messageBean)  throws HZBatchTransferMessageException{
 		return  createMessageHead(messageBean).toString()+signature(messageBean);
 	}
 	

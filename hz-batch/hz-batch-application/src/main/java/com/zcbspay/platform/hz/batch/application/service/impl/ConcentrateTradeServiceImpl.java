@@ -18,6 +18,7 @@ import com.zcbspay.platform.hz.batch.business.message.api.bean.CollectionCharges
 import com.zcbspay.platform.hz.batch.business.message.api.bean.PaymentDetaBean;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.ProtocolSignBean;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.ResultBean;
+import com.zcbspay.platform.hz.batch.business.message.exception.HZBatchBusinessMessageException;
 import com.zcbspay.platform.hz.batch.common.utils.DateUtil;
 import com.zcbspay.platform.hz.batch.dao.ChnAgreementDAO;
 import com.zcbspay.platform.hz.batch.dao.OrderCollectBatchDAO;
@@ -51,12 +52,16 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 	private MerchService merchService;
 	@Override
 	public ResultBean batchCollection(TradeBean tradeBean) throws HZBatchApplicationException {
+		/**
+		 * 原则上发送过一次的代收批次，禁止再次发送，如果是因为特殊原因导致的实际交易数据更新成功，但未发送出去，可以手动修改批次状态，
+		 * 但如果是强制重新发起代收，批次明细中已经确认交易成功的不再发送，所有交易都会按照新的代收付交易处理，上一次的渠道交易流水保留
+		 */
 		BatchCollectionChargesBean batchBean = new BatchCollectionChargesBean();
 		List<CollectionChargesDetaBean> detaList = Lists.newArrayList();
 		OrderCollectBatchDO orderCollectBatch = orderCollectBatchDAO.getCollectBatchOrderByTn(tradeBean.getTn());
 		if("00".equals(orderCollectBatch.getStatus())){//状态为待支付才能进行交易
 			throw new HZBatchApplicationException("HZB001");
-		}else if(!"01".equals(orderCollectBatch.getStatus())){
+		}else if(!"01".equals(orderCollectBatch.getStatus())){//其他状态的批次订单
 			throw new HZBatchApplicationException("HZB002");
 		}
 		List<OrderCollectDetaDO> detaOrderList = orderCollectDetaDAO.getDetaListByBatchtid(orderCollectBatch.getTid());
@@ -65,7 +70,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 			throw new HZBatchApplicationException("HZB005");
 		}
 		for(OrderCollectDetaDO collectDeta : detaOrderList){
-			if(!"01".equals(collectDeta.getStatus())){//状态不是待支付的交易忽略
+			if("00".equals(collectDeta.getStatus())){//状态为交易成功的交易忽略
 				continue;
 			}
 			CollectionChargesDetaBean detaBean = new CollectionChargesDetaBean();
@@ -91,12 +96,26 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		batchBean.setTotalAmt(orderCollectBatch.getTotalamt()+"");
 		batchBean.setTotalCount(orderCollectBatch.getTotalqty()+"");
 		batchBean.setDetaList(detaList);
-		ResultBean resultBean = businesssMessageSender.batchCollectionCharges(batchBean);
+		//批次状态和明细状态修改为正在交易中（02）
+		orderCollectBatchDAO.updateOrderToPay(tradeBean.getTn());
+		orderCollectDetaDAO.updateOrderToPay(orderCollectBatch.getTid());
+		ResultBean resultBean = null;
+		try {
+			resultBean = businesssMessageSender.batchCollectionCharges(batchBean);
+		} catch (HZBatchBusinessMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
 		return resultBean;
 	}
 
 	@Override
 	public ResultBean batchPayment(TradeBean tradeBean) throws HZBatchApplicationException {
+		/**
+		 * 原则上发送过一次的代收批次，禁止再次发送，如果是因为特殊原因导致的实际交易数据更新成功，但未发送出去，可以手动修改批次状态，
+		 * 但如果是强制重新发起代收，批次明细中已经确认交易成功的不再发送，所有交易都会按照新的代收付交易处理，上一次的渠道交易流水保留
+		 */
 		BatchPaymentBean paymentBean = new BatchPaymentBean();
 		List<PaymentDetaBean> detaList = Lists.newArrayList();
 		OrderPaymentBatchDO paymentBatchOrder = orderPaymentBatchDAO.getPaymentBatchOrderByTn(tradeBean.getTn());
@@ -111,6 +130,9 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 			throw new HZBatchApplicationException("HZB005");
 		}
 		for(OrderPaymentDetaDO orderDeta : orderList){
+			if("00".equals(orderDeta.getStatus())){//状态为交易成功的交易忽略，防止交易成功订单重复支付
+				continue;
+			}
 			PaymentDetaBean detaBean = new PaymentDetaBean();
 			detaBean.setDebtorUnitCode(merchantBean.getChargingunit());
 			detaBean.setCommitDate(DateUtil.getCurrentDate());
@@ -131,31 +153,69 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		paymentBean.setTotalAmt(paymentBatchOrder.getTotalamt()+"");
 		paymentBean.setTotalCount(paymentBatchOrder.getTotalqty()+"");
 		paymentBean.setDetaList(detaList);
-		ResultBean resultBean = businesssMessageSender.batchPayment(paymentBean);
+		//批次状态和明细状态修改为正在交易中（02）
+		orderPaymentBatchDAO.updateOrderToPay(tradeBean.getTn());
+		orderPaymentDetaDAO.updateOrderToPay(paymentBatchOrder.getTid());
+		ResultBean resultBean = null;
+		try {
+			resultBean = businesssMessageSender.batchPayment(paymentBean);
+		} catch (HZBatchBusinessMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
 		return resultBean;
 	}
 
 	@Override
 	public ResultBean signInOrOut(TradeBean tradeBean) {
-		ResultBean resultBean = businesssMessageSender.signInAndSignOut(tradeBean.getSignOperateType());
+		ResultBean resultBean = null;
+		try {
+			resultBean = businesssMessageSender.signInAndSignOut(tradeBean.getSignOperateType());
+		} catch (HZBatchBusinessMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
 		return resultBean;
 	}
 
 	@Override
 	public ResultBean downLoadBill(TradeBean tradeBean) {
-		ResultBean resultBean = businesssMessageSender.downLoadBill(tradeBean.getBillDate(), tradeBean.getBillOperateType());
+		ResultBean resultBean = null;
+		try {
+			resultBean = businesssMessageSender.downLoadBill(tradeBean.getBillDate(), tradeBean.getBillOperateType());
+		} catch (HZBatchBusinessMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
 		return resultBean;
 	}
 
 	@Override
 	public ResultBean protocolSign(List<ProtocolSignBean> protocolList) {
-		ResultBean resultBean = businesssMessageSender.protocolSign(protocolList);
+		ResultBean resultBean = null;
+		try {
+			resultBean = businesssMessageSender.protocolSign(protocolList);
+		} catch (HZBatchBusinessMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
 		return resultBean;
 	}
 
 	@Override
 	public ResultBean protocolDownLoad(TradeBean tradeBean) {
-		ResultBean resultBean = businesssMessageSender.downloadProtocol(tradeBean.getDebtorUnitCode(), tradeBean.getSignDate(), tradeBean.getDownLoadType());
+		ResultBean resultBean = null;
+		try {
+			resultBean = businesssMessageSender.downloadProtocol(tradeBean.getDebtorUnitCode(), tradeBean.getSignDate(), tradeBean.getDownLoadType());
+		} catch (HZBatchBusinessMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
 		return resultBean;
 	}
 

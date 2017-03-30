@@ -10,12 +10,14 @@ import com.google.common.collect.Lists;
 import com.zcbspay.platform.hz.batch.business.message.api.BusinessMessageReceiver;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.MessageTypeEnum;
+import com.zcbspay.platform.hz.batch.business.message.exception.HZBatchBusinessMessageException;
 import com.zcbspay.platform.hz.batch.message.bean.CollectBillBean;
 import com.zcbspay.platform.hz.batch.message.bean.ProtocolDetaBean;
 import com.zcbspay.platform.hz.batch.message.bean.response.AUT032RSPBean;
 import com.zcbspay.platform.hz.batch.message.bean.response.DLD032RSPBean;
 import com.zcbspay.platform.hz.batch.message.bean.response.GMT031RSPBean;
 import com.zcbspay.platform.hz.batch.transfer.message.api.assemble.MessageAssemble;
+import com.zcbspay.platform.hz.batch.transfer.message.exception.HZBatchTransferMessageException;
 import com.zcbspay.platform.hz.batch.utils.DateUtil;
 
 public class BusinessMessageTest extends BaseTest {
@@ -26,7 +28,7 @@ public class BusinessMessageTest extends BaseTest {
 	private MessageAssemble messageAssemble;
 
 	@Test
-	public void test() {
+	public void test() throws HZBatchTransferMessageException {
 		// 签到签退
 		//test_sign();
 		// 下载协议
@@ -35,7 +37,7 @@ public class BusinessMessageTest extends BaseTest {
 		test_downLoad_bill(MessageTypeEnum.DLD032);
 	}
 
-	private void test_downLoad_bill(MessageTypeEnum messageType) {
+	private void test_downLoad_bill(MessageTypeEnum messageType) throws HZBatchTransferMessageException {
 		MessageBean messageBean = new MessageBean();
 		messageBean.setMessageTypeEnum(messageType);
 		if(messageType==MessageTypeEnum.DLD032){
@@ -78,11 +80,16 @@ public class BusinessMessageTest extends BaseTest {
 		}else if(messageType==MessageTypeEnum.DLD037){
 			
 		}
-		businessMessageReceiver.downLoadBill(messageBean);
+		try {
+			businessMessageReceiver.downLoadBill(messageBean);
+		} catch (HZBatchBusinessMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 
-	private void test_download_protocol() {
+	private void test_download_protocol() throws HZBatchTransferMessageException {
 		MessageBean messageBean = new MessageBean();
 		messageBean.setMessageTypeEnum(MessageTypeEnum.AUT032);
 		AUT032RSPBean aut032rspBean = new AUT032RSPBean();
@@ -109,10 +116,15 @@ public class BusinessMessageTest extends BaseTest {
 		}
 		aut032rspBean.setDetaList(detaList);
 		messageBean.setMessageBean(aut032rspBean);
-		businessMessageReceiver.downloadProtocol(messageBean);
+		try {
+			businessMessageReceiver.downloadProtocol(messageBean);
+		} catch (HZBatchBusinessMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public void test_sign() {
+	public void test_sign() throws HZBatchTransferMessageException {
 		MessageBean messageBean = new MessageBean();
 		messageBean.setMessageTypeEnum(MessageTypeEnum.GMT031);
 		GMT031RSPBean gmt031rspBean = new GMT031RSPBean();
@@ -133,6 +145,11 @@ public class BusinessMessageTest extends BaseTest {
 		gmt031rspBean.setSignInType("1");
 		System.out.println(JSON.toJSONString(gmt031rspBean));
 		messageBean.setMessageBean(gmt031rspBean);
-		businessMessageReceiver.signInAndSignOut(messageBean);
+		try {
+			businessMessageReceiver.signInAndSignOut(messageBean);
+		} catch (HZBatchBusinessMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

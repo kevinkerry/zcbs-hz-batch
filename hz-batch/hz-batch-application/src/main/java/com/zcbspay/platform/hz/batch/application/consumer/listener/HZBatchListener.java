@@ -151,7 +151,7 @@ public class HZBatchListener implements MessageListenerConcurrently{
 					}
 				}
 			}
-			concentrateCacheResultService.saveInsteadPayResult(KEY, JSON.toJSONString(resultBean));
+			concentrateCacheResultService.saveInsteadPayResult(KEY + msg.getMsgId(), JSON.toJSONString(resultBean));
 			log.info(Thread.currentThread().getName()+ " Receive New Messages: " + msgs);
 		}
 		return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;

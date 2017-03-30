@@ -24,4 +24,16 @@ public interface OrderCollectDetaDAO extends BaseDAO<OrderCollectDetaDO> {
      * @param txnseqno 交易序列号
      */
     public void updateOrderToSuccess(String txnseqno,String rspCode,String rspMsg) ;
+
+    /**
+     * 更新代收订单结果
+     * @param payordno
+     */
+    public void updateOrderResult(String payordno);
+    
+    /**
+     * 更新批次明细状态为交易中
+     * @param batchId
+     */
+    public void updateOrderToPay(long batchId);
 }

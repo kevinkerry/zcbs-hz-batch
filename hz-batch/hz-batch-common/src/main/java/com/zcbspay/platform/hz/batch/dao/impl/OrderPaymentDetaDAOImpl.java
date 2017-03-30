@@ -54,4 +54,17 @@ public class OrderPaymentDetaDAOImpl extends HibernateBaseDAOImpl<OrderPaymentDe
 		int rows = query.executeUpdate();
 		log.info("updateOrderToSuccess() effect rows:"+rows);
 	}
+	
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	public void updateOrderToPay(long batchId) {
+		// TODO Auto-generated method stub
+		String hql = "update OrderPaymentDetaDO set status = ? where batchtid = ? ";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter(0, "02");
+		query.setParameter(1, batchId);
+		int rows = query.executeUpdate();
+		log.info("updateOrderToPay() effect rows:"+rows);
+	}
 }

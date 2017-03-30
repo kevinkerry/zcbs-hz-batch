@@ -5,42 +5,47 @@ import org.springframework.stereotype.Service;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.zcbspay.platform.hz.batch.fe.api.MessageSender;
 import com.zcbspay.platform.hz.batch.fe.enums.MessageTypeEnum;
+import com.zcbspay.platform.hz.batch.fe.exception.HZBatchFEException;
 import com.zcbspay.platform.hz.batch.transfer.message.api.unpack.MessageUnpack;
 
 @Service("messageSender")
 public class MessageSenderImpl implements MessageSender {
 
-	@Reference(version="1.0")
+	@Reference(version = "1.0")
 	private MessageUnpack messageUnpack;
+
 	@Override
-	public String sendMessage(String message, String msgType) {
+	public String sendMessage(String message, String msgType)
+			throws HZBatchFEException {
 		MessageTypeEnum messageType = MessageTypeEnum.valueOf(msgType);
+
 		switch (messageType) {
-			case AUT031://代收业务委托协议签约报文AUT031
+			case AUT031:// 代收业务委托协议签约报文AUT031
 	
 				break;
-			case AUT032://代收业务委托协议下载报文AUT032
+			case AUT032:// 代收业务委托协议下载报文AUT032
 	
 				break;
-			case CMT031://借记报文CMT031 批量代收
+			case CMT031:// 借记报文CMT031 批量代收
 	
 				break;
-			case CMT036://贷记报文CMT036 批量代付
+			case CMT036:// 贷记报文CMT036 批量代付
 	
 				break;
-			case DLD032://收费明细下载报文DLD032
+			case DLD032:// 收费明细下载报文DLD032
 	
 				break;
-			case DLD037://付费明细下载报文DLD037
+			case DLD037:// 付费明细下载报文DLD037
 	
 				break;
-			case GMT031://签到/签退报文GMT031
+			case GMT031:// 签到/签退报文GMT031
 	
 				break;
 			default:
-				break;
+				throw new HZBatchFEException("HZB007");
 		}
-		return null;
+
+		return "success";
 	}
 
 }

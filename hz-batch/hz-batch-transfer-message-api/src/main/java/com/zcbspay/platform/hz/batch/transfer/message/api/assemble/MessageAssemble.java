@@ -2,6 +2,7 @@ package com.zcbspay.platform.hz.batch.transfer.message.api.assemble;
 
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageBean;
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageHead;
+import com.zcbspay.platform.hz.batch.transfer.message.exception.HZBatchTransferMessageException;
 
 
 /**
@@ -19,22 +20,25 @@ public interface MessageAssemble {
      * 
      * @param bean
      * @return
+     * @throws HZBatchTransferMessageException 
      */
-    public MessageHead createMessageHead(MessageBean bean);
+    public MessageHead createMessageHead(MessageBean bean) throws HZBatchTransferMessageException;
 
     /**
      * 数字签名方法，根据报文bean以及报文的类型，对报文中的关键要素进行签名串的拼接，调用软加密服务的签名方法生成数字签名字符串
      * 
      * @param bean
      * @return
+     * @throws HZBatchTransferMessageException 
      */
-    public String signature(MessageBean bean);
+    public String signature(MessageBean bean) throws HZBatchTransferMessageException;
 
     /**
      * 组装报文方法，返回报文字符串 报文格式：报文头+报文体（内部数字鉴别码）
      * 
      * @param bean
      * @return
+     * @throws HZBatchTransferMessageException 
      */
-    public String assemble(MessageBean messageBean);
+    public String assemble(MessageBean messageBean) throws HZBatchTransferMessageException;
 }

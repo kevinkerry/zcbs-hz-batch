@@ -27,6 +27,7 @@ import com.zcbspay.platform.hz.batch.business.message.dao.ChnProtocolSignDetaDAO
 import com.zcbspay.platform.hz.batch.business.message.dao.ChnReconDownLogDAO;
 import com.zcbspay.platform.hz.batch.business.message.dao.ChnSignInOutLogDAO;
 import com.zcbspay.platform.hz.batch.business.message.dao.ChnTxnDAO;
+import com.zcbspay.platform.hz.batch.business.message.exception.HZBatchBusinessMessageException;
 import com.zcbspay.platform.hz.batch.business.message.pojo.ChnCollectBatchDO;
 import com.zcbspay.platform.hz.batch.business.message.pojo.ChnCollectDetaDO;
 import com.zcbspay.platform.hz.batch.business.message.pojo.ChnPaymentBatchDO;
@@ -43,6 +44,7 @@ import com.zcbspay.platform.hz.batch.dao.ChnAgreementDAO;
 import com.zcbspay.platform.hz.batch.dao.TxnsLogDAO;
 import com.zcbspay.platform.hz.batch.enums.TradeStatFlagEnum;
 import com.zcbspay.platform.hz.batch.fe.api.MessageSender;
+import com.zcbspay.platform.hz.batch.fe.exception.HZBatchFEException;
 import com.zcbspay.platform.hz.batch.message.bean.request.AUT031Bean;
 import com.zcbspay.platform.hz.batch.message.bean.request.AUT032Bean;
 import com.zcbspay.platform.hz.batch.message.bean.request.CMT031Bean;
@@ -54,6 +56,7 @@ import com.zcbspay.platform.hz.batch.transfer.message.api.assemble.MessageAssemb
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageBean;
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageHead;
 import com.zcbspay.platform.hz.batch.transfer.message.api.enums.MessageTypeEnum;
+import com.zcbspay.platform.hz.batch.transfer.message.exception.HZBatchTransferMessageException;
 
 @Service("businesssMessageSender")
 public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
@@ -91,12 +94,19 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	private ChnReconDownLogDAO chnReconDownLogDAO;
 	@Reference(version="1.0")
 	private MessageSender messageSender;
+	
+	
 	@Override
-	public ResultBean batchCollectionCharges(
-			BatchCollectionChargesBean collectionChargesBean) {
+	public ResultBean batchCollectionCharges(BatchCollectionChargesBean collectionChargesBean) throws HZBatchBusinessMessageException {
 		MessageBean messageBean = new MessageBean();
 		messageBean.setMessageTypeEnum(MessageTypeEnum.CMT031);
-		MessageHead messageHead = messageAssemble.createMessageHead(messageBean);
+		MessageHead messageHead = null;
+		try {
+			messageHead = messageAssemble.createMessageHead(messageBean);
+		} catch (HZBatchTransferMessageException e) {
+			e.printStackTrace();
+			throw new HZBatchBusinessMessageException(e.getCode());
+		}
 		ChnCollectBatchDO chnCollectBatch = new ChnCollectBatchDO();
 		chnCollectBatch.setBatchno(tradeSequenceService.getCollectionBatchNo());
 		chnCollectBatch.setMsgtype(messageHead.getMsgType());
@@ -109,7 +119,13 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		chnCollectBatch.setTotalamt(Long.valueOf(collectionChargesBean.getTotalAmt()));
 		chnCollectBatch.setOperatorcode(messageHead.getOperator());
 		chnCollectBatch.setOrigbatchno(collectionChargesBean.getBatchNo());
-		ChnCollectBatchDO batch = chnCollectBatchDAO.saveCollectBatch(chnCollectBatch);
+		ChnCollectBatchDO batch;
+		try {
+			batch = chnCollectBatchDAO.saveCollectBatch(chnCollectBatch);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB008");
+		}
 		//保存批量数据
 		List<CollectionChargesDetaBean> detaList = collectionChargesBean.getDetaList();
 		List<CMT031Bean> msgList = Lists.newArrayList();
@@ -164,20 +180,44 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			txnsLogDAO.updatePayInfo(payPartyBean);
 			txnsLogDAO.updateTradeStatFlag(detaBean.getTxnseqno(), TradeStatFlagEnum.PAYING);
 		}
-		chnCollectDetaDAO.saveBatchCollectDeta(collectDetaList);
+		try {
+			chnCollectDetaDAO.saveBatchCollectDeta(collectDetaList);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB010");
+		}
 		messageBean.setMessageBean(msgList);
-		String message = messageAssemble.assemble(messageBean);
+		String message = null;
+		try {
+			message = messageAssemble.assemble(messageBean);
+		} catch (HZBatchTransferMessageException e) {
+			e.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB009");
+		}
+		ResultBean resultBean = null;
 		//无应答报文，只能通过有无异常进行判断
-		messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
+		try {
+			String resultMsg = messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
+			resultBean = new ResultBean(resultMsg);
+		} catch (HZBatchFEException e) {
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
 		
-		return null;
+		return resultBean;
 	}
 
 	@Override
-	public ResultBean batchPayment(BatchPaymentBean paymentBean) {
+	public ResultBean batchPayment(BatchPaymentBean paymentBean) throws HZBatchBusinessMessageException {
 		MessageBean messageBean = new MessageBean();
 		messageBean.setMessageTypeEnum(MessageTypeEnum.CMT036);
-		MessageHead messageHead = messageAssemble.createMessageHead(messageBean);
+		MessageHead messageHead = null;
+		try {
+			messageHead = messageAssemble.createMessageHead(messageBean);
+		} catch (HZBatchTransferMessageException e) {
+			e.printStackTrace();
+			throw new HZBatchBusinessMessageException(e.getCode());
+		}
 		ChnPaymentBatchDO chnPaymentBatch = new ChnPaymentBatchDO();
 		chnPaymentBatch.setBatchno(tradeSequenceService.getCollectionBatchNo());
 		chnPaymentBatch.setMsgtype(messageHead.getMsgType());
@@ -190,7 +230,13 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		chnPaymentBatch.setTotalamt(Long.valueOf(paymentBean.getTotalAmt()));
 		chnPaymentBatch.setOperatorcode(messageHead.getOperator());
 		chnPaymentBatch.setOrigbatchno(paymentBean.getBatchNo());
-		ChnPaymentBatchDO batch = chnPaymentBatchDAO.savePaymentBatch(chnPaymentBatch);
+		
+		try {
+			chnPaymentBatch = chnPaymentBatchDAO.savePaymentBatch(chnPaymentBatch);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB011");
+		}
 		List<PaymentDetaBean> detaList = paymentBean.getDetaList();
 		List<CMT036Bean> msgList = Lists.newArrayList();
 		List<ChnPaymentDetaDO> paymentDetaList = Lists.newArrayList();
@@ -213,8 +259,8 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			msgList.add(cmt036Bean);
 			
 			ChnPaymentDetaDO chnCollectDeta = new ChnPaymentDetaDO();
-			chnCollectDeta.setBatchtid(batch.getTid());
-			chnCollectDeta.setBatchno(batch.getBatchno());
+			chnCollectDeta.setBatchtid(chnPaymentBatch.getTid());
+			chnCollectDeta.setBatchno(chnPaymentBatch.getBatchno());
 			chnCollectDeta.setChargingunit(detaBean.getDebtorUnitCode());
 			chnCollectDeta.setTransdate(detaBean.getCommitDate());
 			chnCollectDeta.setTxid(cmt036Bean.getTxId());
@@ -240,15 +286,34 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			txnsLogDAO.updatePayInfo(payPartyBean);
 			txnsLogDAO.updateTradeStatFlag(detaBean.getTxnseqno(), TradeStatFlagEnum.PAYING);
 		}
-		chnPaymentDetaDAO.saveBatchPaymentDeta(paymentDetaList);
+		try {
+			chnPaymentDetaDAO.saveBatchPaymentDeta(paymentDetaList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB012");
+		}
 		messageBean.setMessageBean(msgList);
-		String message = messageAssemble.assemble(messageBean);
+		String message;
+		try {
+			message = messageAssemble.assemble(messageBean);
+		} catch (HZBatchTransferMessageException e1) {
+			e1.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB009");
+		}
+		
+		ResultBean resultBean = null;
 		//无应答报文，只能通过有无异常进行判断
-		messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
-		return null;
+		try {
+			String resultMsg = messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
+			resultBean = new ResultBean(resultMsg);
+		} catch (HZBatchFEException e) {
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
+		return resultBean;
 	}
 	@Override
-	public ResultBean signInAndSignOut(String operateType) {
+	public ResultBean signInAndSignOut(String operateType) throws HZBatchBusinessMessageException {
 		if(checkSignStatus()){
 			return new ResultBean("", "已签到");
 		}
@@ -269,7 +334,13 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		MessageBean messageBean = new MessageBean();
 		messageBean.setMessageBean(gmt031Bean);
 		messageBean.setMessageTypeEnum(MessageTypeEnum.GMT031);
-		MessageHead messageHead = messageAssemble.createMessageHead(messageBean);
+		MessageHead messageHead = null;
+		try {
+			messageHead = messageAssemble.createMessageHead(messageBean);
+		} catch (HZBatchTransferMessageException e) {
+			e.printStackTrace();
+			throw new HZBatchBusinessMessageException(e.getCode());
+		}
 		chnSignInOutLog.setMsgtype(messageHead.getMsgType());
 		chnSignInOutLog.setServicetype(messageHead.getServiceType());
 		chnSignInOutLog.setTransmitleg(messageHead.getSenderCode());
@@ -281,10 +352,29 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		chnSignInOutLog.setSigndate(gmt031Bean.getSignInDate());
 		chnSignInOutLog.setSigntime(gmt031Bean.getSignInTime());
 		chnSignInOutLog.setSigntype(gmt031Bean.getSignInType());
-		chnSignInOutLogDAO.saveSignInOutLog(chnSignInOutLog);
-		String message = messageAssemble.assemble(messageBean);
-		messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
-		return null;
+		try {
+			chnSignInOutLogDAO.saveSignInOutLog(chnSignInOutLog);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB013");
+		}
+		String message = null;
+		try {
+			message = messageAssemble.assemble(messageBean);
+		} catch (HZBatchTransferMessageException e1) {
+			e1.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB009");
+		}
+		ResultBean resultBean = null;
+		//无应答报文，只能通过有无异常进行判断
+		try {
+			String resultMsg = messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
+			resultBean = new ResultBean(resultMsg);
+		} catch (HZBatchFEException e) {
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
+		return resultBean;
 	}
 	
 	private boolean checkSignStatus(){
@@ -299,7 +389,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	}
 
 	@Override
-	public ResultBean downLoadBill(String billDate, String operateType) {
+	public ResultBean downLoadBill(String billDate, String operateType) throws HZBatchBusinessMessageException {
 		ChnReconDownLogDO reconDownLog = new ChnReconDownLogDO();
 		MessageBean messageBean = new MessageBean();
 		if("01".equals(operateType)){//代收
@@ -312,7 +402,13 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			dld032Bean.setOperator(Constant.getInstance().getOperatorCode());
 			messageBean.setMessageBean(dld032Bean);
 			messageBean.setMessageTypeEnum(MessageTypeEnum.DLD032);
-			MessageHead messageHead = messageAssemble.createMessageHead(messageBean);
+			MessageHead messageHead = null;
+			try {
+				messageHead = messageAssemble.createMessageHead(messageBean);
+			} catch (HZBatchTransferMessageException e) {
+				e.printStackTrace();
+				throw new HZBatchBusinessMessageException(e.getCode());
+			}
 			reconDownLog.setMsgtype(messageHead.getMsgType());
 			reconDownLog.setServicetype(messageHead.getServiceType());
 			reconDownLog.setTransmitleg(messageHead.getSenderCode());
@@ -335,7 +431,13 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			dld037Bean.setOperator(Constant.getInstance().getOperatorCode());
 			messageBean.setMessageBean(dld037Bean);
 			messageBean.setMessageTypeEnum(MessageTypeEnum.DLD037);
-			MessageHead messageHead = messageAssemble.createMessageHead(messageBean);
+			MessageHead messageHead = null;
+			try {
+				messageHead = messageAssemble.createMessageHead(messageBean);
+			} catch (HZBatchTransferMessageException e) {
+				e.printStackTrace();
+				throw new HZBatchBusinessMessageException(e.getCode());
+			}
 			reconDownLog.setMsgtype(messageHead.getMsgType());
 			reconDownLog.setServicetype(messageHead.getServiceType());
 			reconDownLog.setTransmitleg(messageHead.getSenderCode());
@@ -350,19 +452,39 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			reconDownLog.setLocaltime(dld037Bean.getLocalTime());
 		}
 		chnReconDownLogDAO.saveReconDownLog(reconDownLog);
-		String message = messageAssemble.assemble(messageBean);
-		messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
+		String message = null;
+		try {
+			message = messageAssemble.assemble(messageBean);
+		} catch (HZBatchTransferMessageException e1) {
+			e1.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB009");
+		}
+		ResultBean resultBean = null;
+		//无应答报文，只能通过有无异常进行判断
+		try {
+			String resultMsg = messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
+			resultBean = new ResultBean(resultMsg);
+		} catch (HZBatchFEException e) {
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
 		
 		
-		return null;
+		return resultBean;
 	}
 
 	@Override
-	public ResultBean protocolSign(List<ProtocolSignBean> protocolList) {
+	public ResultBean protocolSign(List<ProtocolSignBean> protocolList) throws HZBatchBusinessMessageException {
 		//赋值消息bean
 		MessageBean messageBean = new MessageBean();
 		messageBean.setMessageTypeEnum(MessageTypeEnum.AUT031);
-		MessageHead messageHead = messageAssemble.createMessageHead(messageBean);
+		MessageHead messageHead = null;
+		try {
+			messageHead = messageAssemble.createMessageHead(messageBean);
+		} catch (HZBatchTransferMessageException e) {
+			e.printStackTrace();
+			throw new HZBatchBusinessMessageException(e.getCode());
+		}
 		ChnProtocolSignBatchDO chnProtocolSignBatch = new ChnProtocolSignBatchDO();
 		chnProtocolSignBatch.setBatchno(tradeSequenceService.getProtocolBatchNo());
 		chnProtocolSignBatch.setMsgtype(messageHead.getMsgType());
@@ -373,7 +495,12 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		chnProtocolSignBatch.setTranstime(messageHead.getLocalTime());
 		chnProtocolSignBatch.setOperatorcode(messageHead.getOperator());
 		chnProtocolSignBatch.setOrigbatchno("");//留作以后处理
-		chnProtocolSignBatch = chnProtocolSignBatchDAO.saveProtocolSignBatch(chnProtocolSignBatch);
+		try {
+			chnProtocolSignBatch = chnProtocolSignBatchDAO.saveProtocolSignBatch(chnProtocolSignBatch);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB014");
+		}
 		List<AUT031Bean> beanList = Lists.newArrayList();
 		List<ChnProtocolSignDetaDO> detaList = Lists.newArrayList();
 		for(ProtocolSignBean protocol : protocolList){
@@ -406,16 +533,35 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			protocolSignDeta.setDebtoraddress(protocol.getDebtorAddress());
 			detaList.add(protocolSignDeta);
 		}
-		chnProtocolSignDetaDAO.batchSaveProtocolSignDeta(detaList);
+		try {
+			chnProtocolSignDetaDAO.batchSaveProtocolSignDeta(detaList);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB015");
+		}
 		messageBean.setMessageBean(beanList);
-		String message = messageAssemble.assemble(messageBean);
-		messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
+		String message = null;
+		try {
+			message = messageAssemble.assemble(messageBean);
+		} catch (HZBatchTransferMessageException e1) {
+			e1.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB009");
+		}
+		ResultBean resultBean = null;
+		//无应答报文，只能通过有无异常进行判断
+		try {
+			String resultMsg = messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
+			resultBean = new ResultBean(resultMsg);
+		} catch (HZBatchFEException e) {
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
 		
-		return null;
+		return resultBean;
 	}
 
 	@Override
-	public ResultBean downloadProtocol(String debtorUnitCode, String signDate, String downLoadType) {
+	public ResultBean downloadProtocol(String debtorUnitCode, String signDate, String downLoadType) throws HZBatchBusinessMessageException {
 		AUT032Bean aut032Bean = new AUT032Bean();
 		aut032Bean.setDebtorUnitCode(debtorUnitCode);
 		aut032Bean.setProtocolDate(signDate);
@@ -423,7 +569,13 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		MessageBean messageBean = new MessageBean();
 		messageBean.setMessageBean(aut032Bean);
 		messageBean.setMessageTypeEnum(MessageTypeEnum.AUT032);
-		MessageHead messageHead = messageAssemble.createMessageHead(messageBean);
+		MessageHead messageHead = null;
+		try {
+			messageHead = messageAssemble.createMessageHead(messageBean);
+		} catch (HZBatchTransferMessageException e) {
+			e.printStackTrace();
+			throw new HZBatchBusinessMessageException(e.getCode());
+		}
 		ChnProtcolDownLogDO chnProtcolDownLog = new ChnProtcolDownLogDO();
 		chnProtcolDownLog.setMsgtype(messageHead.getMsgType());
 		chnProtcolDownLog.setServicetype(messageHead.getServiceType());
@@ -436,11 +588,30 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		chnProtcolDownLog.setChargingunit(debtorUnitCode);
 		chnProtcolDownLog.setDownloadtype(downLoadType);
 		chnProtcolDownLog.setSigndate(signDate);
-		chnProtcolDownLogDAO.saveProtcolDownLog(chnProtcolDownLog);
-		String message = messageAssemble.assemble(messageBean);
-		messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
+		try {
+			chnProtcolDownLogDAO.saveProtcolDownLog(chnProtcolDownLog);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB016");
+		}
+		String message = null;
+		try {
+			message = messageAssemble.assemble(messageBean);
+		} catch (HZBatchTransferMessageException e1) {
+			e1.printStackTrace();
+			throw new HZBatchBusinessMessageException("HZB009");
+		}
+		ResultBean resultBean = null;
+		//无应答报文，只能通过有无异常进行判断
+		try {
+			String resultMsg = messageSender.sendMessage(message, messageBean.getMessageTypeEnum().name());
+			resultBean = new ResultBean(resultMsg);
+		} catch (HZBatchFEException e) {
+			e.printStackTrace();
+			resultBean = new ResultBean(e.getCode(), e.getMessage());
+		}
 		
-		return null;
+		return resultBean;
 	}
 
 }

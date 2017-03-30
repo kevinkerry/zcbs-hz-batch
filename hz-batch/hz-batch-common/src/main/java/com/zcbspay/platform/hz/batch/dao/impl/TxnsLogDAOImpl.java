@@ -177,7 +177,7 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<TxnsLogDO> implements
 			rspmsg = new RspmsgDO();
 			rspmsg.setRspinfo("未知异常");
 		}
-		String hql = "update TxnsLogDO set payordfintime = ?, payretcode = ?, payretinfo = ?, accordfintime = ?,retdatetime=?,tradetxnflag=?,tradestatflag = ?,relate=?,tradeseltxn=?  where payordno=?";
+		String hql = "update TxnsLogDO set payordfintime = ?, payretcode = ?, payretinfo = ?, accordfintime = ?,retdatetime=?,tradetxnflag=?,tradestatflag = ?,relate=?,tradeseltxn=?,retcode = ?,retinfo = ?  where payordno=?";
 		Query query = getSession().createQuery(hql);
 		query.setParameter(0, DateUtil.getCurrentDateTime());
 		query.setParameter(1, payPartyBean.getPayretcode());
@@ -192,10 +192,23 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<TxnsLogDO> implements
 		query.setParameter(6, TradeStatFlagEnum.FINISH_SUCCESS.getStatus());
 		query.setParameter(7, "10000000");
 		query.setParameter(8, UUIDUtil.uuid());
-		query.setParameter(9, payPartyBean.getPayordno());
+		query.setParameter(9, rspmsg.getWebrspcode());
+		query.setParameter(10, rspmsg.getRspinfo());
+		query.setParameter(11, payPartyBean.getPayordno());
 		int rows = query.executeUpdate();
 		log.info("updatePayInfo() effect rows:" + rows);
 		
+	}
+	
+	
+
+	@Override
+	@Transactional(readOnly=true)
+	public TxnsLogDO getTxnsLogByPayOrder(String payordno) {
+		Criteria criteria = getSession().createCriteria(TxnsLogDO.class);
+		criteria.add(Restrictions.eq("payordno", payordno));
+		TxnsLogDO uniqueResult = (TxnsLogDO) criteria.uniqueResult();
+		return uniqueResult;
 	}
 	
 	

@@ -8,17 +8,18 @@ import com.zcbspay.platform.hz.batch.transfer.message.api.assemble.MessageAssemb
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageBean;
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageHead;
 import com.zcbspay.platform.hz.batch.transfer.message.api.enums.MessageTypeEnum;
+import com.zcbspay.platform.hz.batch.transfer.message.exception.HZBatchTransferMessageException;
 
 public class TransMessageTest extends BaseTest{
 
 	@Reference(version="1.0")
 	private MessageAssemble messageAssemble; 
 	@Test
-	public void test(){
+	public void test() throws HZBatchTransferMessageException{
 		test_message_assemble();
 	}
 	
-	public void test_message_assemble(){
+	public void test_message_assemble() throws HZBatchTransferMessageException{
 		//String json = "{\"batchNo\":\"170315061000000048\",\"detaList\":[{\"accountType\":\"0\",\"amount\":\"10\",\"commitDate\":\"20170327\",\"creditorAccountNo\":\"6228480018543668970\",\"creditorBranchCode\":\"203121000010\",\"creditorName\":\"测试账户2\",\"currencyCode\":\"156\",\"debtorAccountNo\":\"6228480018543668979\",\"debtorContract\":\"0987654\",\"debtorUnitCode\":\"2000000610\",\"postscript\":\"test0\",\"txnseqno\":\"1703159900000055\"},{\"accountType\":\"0\",\"amount\":\"10\",\"commitDate\":\"20170327\",\"creditorAccountNo\":\"6228480018543668970\",\"creditorBranchCode\":\"203121000010\",\"creditorName\":\"测试账户2\",\"currencyCode\":\"156\",\"debtorAccountNo\":\"6228480018543668979\",\"debtorContract\":\"0987654\",\"debtorUnitCode\":\"2000000610\",\"postscript\":\"test1\",\"txnseqno\":\"1703159900000056\"},{\"accountType\":\"0\",\"amount\":\"10\",\"commitDate\":\"20170327\",\"creditorAccountNo\":\"6228480018543668970\",\"creditorBranchCode\":\"203121000010\",\"creditorName\":\"测试账户2\",\"currencyCode\":\"156\",\"debtorAccountNo\":\"6228480018543668979\",\"debtorContract\":\"0987654\",\"debtorUnitCode\":\"2000000610\",\"postscript\":\"test2\",\"txnseqno\":\"1703159900000057\"},{\"accountType\":\"0\",\"amount\":\"10\",\"commitDate\":\"20170327\",\"creditorAccountNo\":\"6228480018543668970\",\"creditorBranchCode\":\"203121000010\",\"creditorName\":\"测试账户2\",\"currencyCode\":\"156\",\"debtorAccountNo\":\"6228480018543668979\",\"debtorContract\":\"0987654\",\"debtorUnitCode\":\"2000000610\",\"postscript\":\"test3\",\"txnseqno\":\"1703159900000058\"},{\"accountType\":\"0\",\"amount\":\"10\",\"commitDate\":\"20170327\",\"creditorAccountNo\":\"6228480018543668970\",\"creditorBranchCode\":\"203121000010\",\"creditorName\":\"测试账户2\",\"currencyCode\":\"156\",\"debtorAccountNo\":\"6228480018543668979\",\"debtorContract\":\"0987654\",\"debtorUnitCode\":\"2000000610\",\"postscript\":\"test4\",\"txnseqno\":\"1703159900000059\"}],\"merchNo\":\"200000000000610\",\"totalAmt\":\"50\",\"totalCount\":\"5\"}";	
 		//JSON.parseObject(json,)
 		

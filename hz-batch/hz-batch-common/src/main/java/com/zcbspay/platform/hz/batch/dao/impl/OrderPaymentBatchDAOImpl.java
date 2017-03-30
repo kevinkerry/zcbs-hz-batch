@@ -42,5 +42,16 @@ public class OrderPaymentBatchDAOImpl extends HibernateBaseDAOImpl<OrderPaymentB
 		int rows = query.executeUpdate();
 		log.info("updateOrderToSuccess() effect rows:"+rows);
 	}
-	
+	@Override
+	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Throwable.class)
+	public void updateOrderToPay(String tn) {
+		// TODO Auto-generated method stub
+		String hql = "update OrderPaymentBatchDO set status = ? where tn = ? ";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter(0, "02");
+		query.setParameter(1, tn);
+		int rows = query.executeUpdate();
+		log.info("updateOrderToPay() effect rows:"+rows);
+	}
 }

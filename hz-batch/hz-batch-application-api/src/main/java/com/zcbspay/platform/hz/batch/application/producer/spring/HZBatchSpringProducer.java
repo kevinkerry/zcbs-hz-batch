@@ -26,7 +26,7 @@ import com.zcbspay.platform.hz.batch.application.redis.RedisFactory;
 
 public class HZBatchSpringProducer implements Producer{
 	private final static Logger logger = LoggerFactory.getLogger(HZBatchSpringProducer.class);
-	private static final String KEY = "HZREALTIME:";
+	private static final String KEY = "HZBATCH:";
 	private static final  ResourceBundle RESOURCE = ResourceBundle.getBundle("producer_hz_batch");
 	//RocketMQ消费者客户端
 	private DefaultMQProducer producer;
