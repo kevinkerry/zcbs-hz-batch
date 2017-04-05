@@ -57,7 +57,7 @@ public class BusinessMessageTest extends BaseTest {
 				CollectBillBean collectBillBean = new CollectBillBean();
 				collectBillBean.setDebtorUnitCode("2000000610");
 				collectBillBean.setCommitDate("20170327");
-				collectBillBean.setTxId("0310005"+i);
+				collectBillBean.setTxId("0310007"+(6+i));
 				collectBillBean.setDebtorBranchNo("203121000010");
 				collectBillBean.setDebtorAccountNo("6228480018543668979");
 				collectBillBean.setDebtorName("测试账户1");

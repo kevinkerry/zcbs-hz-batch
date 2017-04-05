@@ -314,7 +314,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	}
 	@Override
 	public ResultBean signInAndSignOut(String operateType) throws HZBatchBusinessMessageException {
-		if(checkSignStatus()){
+		if(checkSignStatus()&&"01".equals(operateType)){//操作类型为签到时并且已经签到时才拒绝再次签到
 			return new ResultBean("", "已签到");
 		}
 		GMT031Bean gmt031Bean = new GMT031Bean();
@@ -361,8 +361,8 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		String message = null;
 		try {
 			message = messageAssemble.assemble(messageBean);
-		} catch (HZBatchTransferMessageException e1) {
-			e1.printStackTrace();
+		} catch (HZBatchTransferMessageException e) {
+			e.printStackTrace();
 			throw new HZBatchBusinessMessageException("HZB009");
 		}
 		ResultBean resultBean = null;

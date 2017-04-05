@@ -13,7 +13,6 @@ package com.zcbspay.platform.hz.batch.dao.impl;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
@@ -31,6 +30,8 @@ import com.zcbspay.platform.hz.batch.common.constant.Constant;
 import com.zcbspay.platform.hz.batch.common.dao.impl.HibernateBaseDAOImpl;
 import com.zcbspay.platform.hz.batch.common.utils.DateUtil;
 import com.zcbspay.platform.hz.batch.common.utils.UUIDUtil;
+import com.zcbspay.platform.hz.batch.dao.OrderCollectDetaDAO;
+import com.zcbspay.platform.hz.batch.dao.OrderPaymentDetaDAO;
 import com.zcbspay.platform.hz.batch.dao.RspmsgDAO;
 import com.zcbspay.platform.hz.batch.dao.TxnsLogDAO;
 import com.zcbspay.platform.hz.batch.enums.BusinessEnum;
@@ -57,6 +58,10 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<TxnsLogDO> implements
 
 	@Autowired
 	private RspmsgDAO rspmsgDAO;
+	@Autowired
+	private OrderCollectDetaDAO orderCollectDetaDAO;
+	@Autowired
+	private OrderPaymentDetaDAO orderPaymentDetaDAO;
 	/**
 	 *
 	 * @param txnseqno
@@ -197,6 +202,11 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<TxnsLogDO> implements
 		query.setParameter(11, payPartyBean.getPayordno());
 		int rows = query.executeUpdate();
 		log.info("updatePayInfo() effect rows:" + rows);
+		if(BusinessEnum.CONCENTRATE_COLLECT_BATCH==payPartyBean.getBusinessEnum()){
+			orderCollectDetaDAO.updateOrderResult(payPartyBean.getPayordno());
+		}else if(BusinessEnum.CONCENTRATE_PAYMENT_BATCH==payPartyBean.getBusinessEnum()){
+			orderPaymentDetaDAO.updateOrderResult(payPartyBean.getPayordno());
+		}
 		
 	}
 	

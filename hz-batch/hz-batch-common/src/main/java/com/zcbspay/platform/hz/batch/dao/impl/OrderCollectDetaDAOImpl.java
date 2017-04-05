@@ -71,6 +71,10 @@ public class OrderCollectDetaDAOImpl extends HibernateBaseDAOImpl<OrderCollectDe
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void updateOrderResult(String payordno){
 		TxnsLogDO txnsLog = txnsLogDAO.getTxnsLogByPayOrder(payordno);
+		if(txnsLog==null){
+			log.warn("payordno "+payordno+"is not exist");
+			return;
+		}
 		//判断交易是否成功
 		if("0000".equals(txnsLog.getRetcode())){//交易成功
 			updateOrderToSuccess(txnsLog.getTxnseqno(), txnsLog.getRetcode(), txnsLog.getRetinfo());

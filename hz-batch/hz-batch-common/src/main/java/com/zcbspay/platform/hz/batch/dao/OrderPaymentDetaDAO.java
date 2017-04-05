@@ -30,4 +30,9 @@ public interface OrderPaymentDetaDAO extends BaseDAO<OrderPaymentDetaDO> {
      * @param batchId
      */
     public void updateOrderToPay(long batchId);
+    /**
+     * 更新代收订单结果
+     * @param payordno
+     */
+    public void updateOrderResult(String payordno);
 }

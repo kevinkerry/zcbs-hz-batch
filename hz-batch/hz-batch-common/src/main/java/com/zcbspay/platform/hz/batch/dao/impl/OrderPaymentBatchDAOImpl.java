@@ -31,14 +31,14 @@ public class OrderPaymentBatchDAOImpl extends HibernateBaseDAOImpl<OrderPaymentB
 	
 	@Override
 	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Throwable.class)
-	public void updateOrderToSuccess(String tn) {
+	public void updateOrderToSuccess(long tid) {
 		// TODO Auto-generated method stub
-		String hql = "update OrderPaymentBatchDO set status = ? , orderfinshtime = ? where tn = ? ";
+		String hql = "update OrderPaymentBatchDO set status = ? , orderfinshtime = ? where tid = ? ";
 		Session session = getSession();
 		Query query = session.createQuery(hql);
-		query.setString(0, "00");
-		query.setString(1, DateUtil.getCurrentDateTime());
-		query.setString(2, tn);
+		query.setParameter(0, "00");
+		query.setParameter(1, DateUtil.getCurrentDateTime());
+		query.setParameter(2, tid);
 		int rows = query.executeUpdate();
 		log.info("updateOrderToSuccess() effect rows:"+rows);
 	}

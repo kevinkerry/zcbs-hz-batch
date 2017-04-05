@@ -17,7 +17,7 @@ public interface OrderPaymentBatchDAO extends BaseDAO<OrderPaymentBatchDO> {
 	 * 更新批次订单状态为支付完成
 	 * @param tn
 	 */
-	public void updateOrderToSuccess(String tn);
+	public void updateOrderToSuccess(long tid);
 
 	/**
 	 * 更新订单状态为交易中
