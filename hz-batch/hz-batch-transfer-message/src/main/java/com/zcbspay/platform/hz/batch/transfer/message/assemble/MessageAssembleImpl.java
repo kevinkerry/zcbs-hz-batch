@@ -19,6 +19,7 @@ import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageBean;
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageHead;
 import com.zcbspay.platform.hz.batch.transfer.message.api.enums.MessageTypeEnum;
 import com.zcbspay.platform.hz.batch.transfer.message.exception.HZBatchTransferMessageException;
+import com.zcbspay.platform.support.cipher.hardware.api.MACHardwareService;
 import com.zcbspay.platform.support.cipher.software.api.MACSoftwareService;
 /**
  * 
@@ -34,6 +35,8 @@ public class MessageAssembleImpl implements MessageAssemble{
 
 	@Reference(version="1.0")
 	private MACSoftwareService macSoftwareService;
+	@Reference(version="1.0")
+	private MACHardwareService macHardwareService;
 	@Override
 	public MessageHead createMessageHead(MessageBean bean) throws HZBatchTransferMessageException{
 		
@@ -122,36 +125,83 @@ public class MessageAssembleImpl implements MessageAssemble{
 	public String signature(MessageBean bean)  throws HZBatchTransferMessageException {
 		MessageTypeEnum messageType = bean.getMessageTypeEnum();
 		StringBuffer msgBuffer = new StringBuffer();
+		String mac = null;
 		switch (messageType){
 			case GMT031:
 				GMT031Bean gmt031Bean =  (GMT031Bean) bean.getMessageBean();
-				gmt031Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("", gmt031Bean.signature()));
+				mac = macHardwareService.genANSI_x9_9_MAC(1, "", gmt031Bean.signature());
+				if(mac==null){
+					gmt031Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("", gmt031Bean.signature()));
+				}else{
+					gmt031Bean.setMsgAuthCode(mac);
+				}
+				if(mac==null){
+					throw new HZBatchTransferMessageException("");
+				}
 				return gmt031Bean.toString();
 			case CMT036:
 				List<CMT036Bean> cmt036BeanList =  (List<CMT036Bean>) bean.getMessageBean();
 				for(CMT036Bean cmt036Bean : cmt036BeanList){
 					//cmt036Bean.signature();//待签名的字符串
-					cmt036Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("", cmt036Bean.signature()));
+					
+					mac = macHardwareService.genANSI_x9_9_MAC(1, "", cmt036Bean.signature());
+					if(mac==null){
+						cmt036Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("", cmt036Bean.signature()));
+					}
+					if(mac==null){
+						throw new HZBatchTransferMessageException("");
+					}else{
+						cmt036Bean.setMsgAuthCode(mac);
+					}
+					
 					msgBuffer.append(cmt036Bean.toString());
 				}
 				return msgBuffer.toString();
 			case DLD037:
 				DLD037Bean dld037Bean =  (DLD037Bean) bean.getMessageBean();
 				//dld037Bean.signature();//待签名的字符串
-				dld037Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("", dld037Bean.signature()));
+				mac = macHardwareService.genANSI_x9_9_MAC(1, "", dld037Bean.signature());
+				if(mac==null){
+					mac = macSoftwareService.genANSI_x9_9_MAC("", dld037Bean.signature());
+					
+				}
+				if(mac==null){
+					throw new HZBatchTransferMessageException("");
+				}else{
+					dld037Bean.setMsgAuthCode(mac);
+				}
+				
 				return dld037Bean.toString();
 			case CMT031:
 				List<CMT031Bean> cmt031BeanList =  (List<CMT031Bean>) bean.getMessageBean();
 				for(CMT031Bean cmt031Bean : cmt031BeanList){
 					//cmt031Bean.signature();//待签名的字符串
-					cmt031Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("", cmt031Bean.signature()));
+					mac = macHardwareService.genANSI_x9_9_MAC(1, "", cmt031Bean.signature());
+					if(mac==null){
+						mac = macSoftwareService.genANSI_x9_9_MAC("", cmt031Bean.signature());
+						
+					}
+					if(mac==null){
+						throw new HZBatchTransferMessageException("");
+					}else{
+						cmt031Bean.setMsgAuthCode(mac);
+					}
 					msgBuffer.append(cmt031Bean.toString());
 				}
 				return msgBuffer.toString();
 			case DLD032:
 				DLD032Bean dld032Bean =  (DLD032Bean) bean.getMessageBean();
 				//dld032Bean.signature();//待签名的字符串
-				dld032Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("", dld032Bean.signature()));
+				mac = macHardwareService.genANSI_x9_9_MAC(1, "", dld032Bean.signature());
+				if(mac==null){
+					mac = macSoftwareService.genANSI_x9_9_MAC("", dld032Bean.signature());
+					
+				}
+				if(mac==null){
+					throw new HZBatchTransferMessageException("");
+				}else{
+					dld032Bean.setMsgAuthCode(mac);
+				}
 				return dld032Bean.toString();
 			case AUT031:
 				List<AUT031Bean> aut031BeanList =  (List<AUT031Bean>) bean.getMessageBean();
