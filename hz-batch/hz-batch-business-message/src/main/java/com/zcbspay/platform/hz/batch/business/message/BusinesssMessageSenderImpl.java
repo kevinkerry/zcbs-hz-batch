@@ -2,6 +2,8 @@ package com.zcbspay.platform.hz.batch.business.message;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -60,7 +62,7 @@ import com.zcbspay.platform.hz.batch.transfer.message.exception.HZBatchTransferM
 
 @Service("businesssMessageSender")
 public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
-	
+	private static final Logger logger = LoggerFactory.getLogger(BusinesssMessageSenderImpl.class);
 	private static final String HZ_SIGN_STATUS = "PARAMETER:HZSIGNSTATUS";
 	@Reference(version="1.0")
 	private MessageAssemble messageAssemble;
@@ -314,9 +316,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	}
 	@Override
 	public ResultBean signInAndSignOut(String operateType) throws HZBatchBusinessMessageException {
-		if(checkSignStatus()&&"01".equals(operateType)){//操作类型为签到时并且已经签到时才拒绝再次签到
-			return new ResultBean("", "已签到");
-		}
+		
 		GMT031Bean gmt031Bean = new GMT031Bean();
 		gmt031Bean.setSignInCode(Constant.getInstance().getSenderCode());
 		gmt031Bean.setSignInDate(DateUtil.getCurrentDate());
@@ -361,6 +361,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		String message = null;
 		try {
 			message = messageAssemble.assemble(messageBean);
+			logger.info(message);
 		} catch (HZBatchTransferMessageException e) {
 			e.printStackTrace();
 			throw new HZBatchBusinessMessageException("HZB009");
@@ -377,16 +378,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		return resultBean;
 	}
 	
-	private boolean checkSignStatus(){
-		ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
-		String signStatus = opsForValue.get(HZ_SIGN_STATUS);
-		//1：签到  0：签退
-		if("1".equals(signStatus)){
-			return true;
-		}else{
-			return false;
-		}
-	}
+	
 
 	@Override
 	public ResultBean downLoadBill(String billDate, String operateType) throws HZBatchBusinessMessageException {

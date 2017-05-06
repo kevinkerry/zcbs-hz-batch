@@ -8,6 +8,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.zcbspay.platform.hz.batch.business.message.api.BusinessMessageReceiver;
+import com.zcbspay.platform.hz.batch.business.message.api.BusinesssMessageSender;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.MessageTypeEnum;
 import com.zcbspay.platform.hz.batch.business.message.exception.HZBatchBusinessMessageException;
@@ -26,15 +27,16 @@ public class BusinessMessageTest extends BaseTest {
 	private BusinessMessageReceiver businessMessageReceiver;
 	@Reference(version = "1.0")
 	private MessageAssemble messageAssemble;
-
+	@Reference(version = "1.0")
+	private BusinesssMessageSender businesssMessageSender;
 	@Test
 	public void test() throws HZBatchTransferMessageException {
 		// 签到签退
-		//test_sign();
+		test_sign();
 		// 下载协议
 		//test_download_protocol();
 		//下载对账文件
-		test_downLoad_bill(MessageTypeEnum.DLD032);
+		//test_downLoad_bill(MessageTypeEnum.DLD032);
 	}
 
 	private void test_downLoad_bill(MessageTypeEnum messageType) throws HZBatchTransferMessageException {
@@ -146,7 +148,7 @@ public class BusinessMessageTest extends BaseTest {
 		System.out.println(JSON.toJSONString(gmt031rspBean));
 		messageBean.setMessageBean(gmt031rspBean);
 		try {
-			businessMessageReceiver.signInAndSignOut(messageBean);
+			businesssMessageSender.signInAndSignOut("01");
 		} catch (HZBatchBusinessMessageException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -129,14 +129,11 @@ public class MessageAssembleImpl implements MessageAssemble{
 		switch (messageType){
 			case GMT031:
 				GMT031Bean gmt031Bean =  (GMT031Bean) bean.getMessageBean();
-				mac = macHardwareService.genANSI_x9_9_MAC(1, "", gmt031Bean.signature());
+				mac = macHardwareService.genANSI_x9_9_MAC(1, "E408C01308B5DFD1", gmt031Bean.signature());
 				if(mac==null){
-					gmt031Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("", gmt031Bean.signature()));
+					gmt031Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("3030303030303030", gmt031Bean.signature()));
 				}else{
 					gmt031Bean.setMsgAuthCode(mac);
-				}
-				if(mac==null){
-					throw new HZBatchTransferMessageException("");
 				}
 				return gmt031Bean.toString();
 			case CMT036:
@@ -144,9 +141,9 @@ public class MessageAssembleImpl implements MessageAssemble{
 				for(CMT036Bean cmt036Bean : cmt036BeanList){
 					//cmt036Bean.signature();//待签名的字符串
 					
-					mac = macHardwareService.genANSI_x9_9_MAC(1, "", cmt036Bean.signature());
+					mac = macHardwareService.genANSI_x9_9_MAC(1, "E408C01308B5DFD1", cmt036Bean.signature());
 					if(mac==null){
-						cmt036Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("", cmt036Bean.signature()));
+						cmt036Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("3030303030303030", cmt036Bean.signature()));
 					}
 					if(mac==null){
 						throw new HZBatchTransferMessageException("");
@@ -160,9 +157,9 @@ public class MessageAssembleImpl implements MessageAssemble{
 			case DLD037:
 				DLD037Bean dld037Bean =  (DLD037Bean) bean.getMessageBean();
 				//dld037Bean.signature();//待签名的字符串
-				mac = macHardwareService.genANSI_x9_9_MAC(1, "", dld037Bean.signature());
+				mac = macHardwareService.genANSI_x9_9_MAC(1, "E408C01308B5DFD1", dld037Bean.signature());
 				if(mac==null){
-					mac = macSoftwareService.genANSI_x9_9_MAC("", dld037Bean.signature());
+					mac = macSoftwareService.genANSI_x9_9_MAC("3030303030303030", dld037Bean.signature());
 					
 				}
 				if(mac==null){
@@ -176,9 +173,9 @@ public class MessageAssembleImpl implements MessageAssemble{
 				List<CMT031Bean> cmt031BeanList =  (List<CMT031Bean>) bean.getMessageBean();
 				for(CMT031Bean cmt031Bean : cmt031BeanList){
 					//cmt031Bean.signature();//待签名的字符串
-					mac = macHardwareService.genANSI_x9_9_MAC(1, "", cmt031Bean.signature());
+					mac = macHardwareService.genANSI_x9_9_MAC(1, "E408C01308B5DFD1", cmt031Bean.signature());
 					if(mac==null){
-						mac = macSoftwareService.genANSI_x9_9_MAC("", cmt031Bean.signature());
+						mac = macSoftwareService.genANSI_x9_9_MAC("3030303030303030", cmt031Bean.signature());
 						
 					}
 					if(mac==null){
@@ -192,9 +189,9 @@ public class MessageAssembleImpl implements MessageAssemble{
 			case DLD032:
 				DLD032Bean dld032Bean =  (DLD032Bean) bean.getMessageBean();
 				//dld032Bean.signature();//待签名的字符串
-				mac = macHardwareService.genANSI_x9_9_MAC(1, "", dld032Bean.signature());
+				mac = macHardwareService.genANSI_x9_9_MAC(1, "E408C01308B5DFD1", dld032Bean.signature());
 				if(mac==null){
-					mac = macSoftwareService.genANSI_x9_9_MAC("", dld032Bean.signature());
+					mac = macSoftwareService.genANSI_x9_9_MAC("3030303030303030", dld032Bean.signature());
 					
 				}
 				if(mac==null){

@@ -1,12 +1,14 @@
 package com.zcbspay.platform.jni;
 
+
+
 public class YHT_JNI {
 
-	public native int sendYHTBWFile(String ip,String port,String sndFName);
+	public native int sendYHTBWFile(String ip,String port,String sndFName,String prepUsePath);
 	
-	public native int recvYHTBWFile(String ip,String port,String sndFName,int timeOut, String rcvedFName,String prepUsePath);
-	
+	public native String recvYHTBWFile(String ip,String port,String sndFName,String prepUsePath);
 	static{
-		 System.loadLibrary("libyhtjni");  
+		 System.loadLibrary("yhtjni");  
 	}
+	
 }

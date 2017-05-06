@@ -2,9 +2,12 @@ package com.zcbspay.platform.hz.batch.transfer.message.unpack;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.zcbspay.platform.hz.batch.business.message.api.BusinessMessageReceiver;
 import com.zcbspay.platform.hz.batch.business.message.exception.HZBatchBusinessMessageException;
@@ -24,6 +27,7 @@ import com.zcbspay.platform.hz.batch.transfer.message.api.unpack.MessageUnpack;
 @Service("messageUnpack")
 public class MessageUnpackImpl implements MessageUnpack {
 
+	private static final Logger logger = LoggerFactory.getLogger(MessageUnpackImpl.class);
 	@Reference(version="1.0")
 	private BusinessMessageReceiver businessMessageReceiver; 
 	@Override
@@ -33,6 +37,7 @@ public class MessageUnpackImpl implements MessageUnpack {
 		String head = message.substring(0,52);
 		String body = message.substring(52);
 		MessageHead messageHead = new MessageHead(head);
+		logger.info("MessageHead:"+JSON.toJSONString(messageHead));
 		MessageTypeEnum messageTypeEnum = MessageTypeEnum.valueOf(messageHead.getMsgType());
 		try {
 			switch (messageTypeEnum) {
@@ -44,8 +49,7 @@ public class MessageUnpackImpl implements MessageUnpack {
 					businessMessageReceiver.downloadProtocol(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
 					break;
 				case CMT031://签到 报文体一条，长度43
-					messageBean = createCMT031(body,messageHead);
-					businessMessageReceiver.signInAndSignOut(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
+					
 					break;
 				case CMT036:
 
@@ -59,7 +63,8 @@ public class MessageUnpackImpl implements MessageUnpack {
 					businessMessageReceiver.downLoadBill(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
 					break;
 				case GMT031:
-					
+					messageBean = createCMT031(body,messageHead);
+					businessMessageReceiver.signInAndSignOut(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
 					break;
 				default:
 					break;
@@ -192,4 +197,5 @@ public class MessageUnpackImpl implements MessageUnpack {
 		messageBean.setMessageTypeEnum(MessageTypeEnum.DLD037);
 		return messageBean;
 	}
+	
 }
