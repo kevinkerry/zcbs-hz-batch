@@ -21,6 +21,10 @@ public class BatchCollectionChargesBean implements Serializable{
 	 */
 	private String merchNo;
 	/**
+	 * 发送方代码
+	 */
+	private String senderCode;
+	/**
 	 * 总笔数
 	 */
 	private String totalCount;
@@ -63,6 +67,12 @@ public class BatchCollectionChargesBean implements Serializable{
 	}
 	public void setDetaList(List<CollectionChargesDetaBean> detaList) {
 		this.detaList = detaList;
+	}
+	public String getSenderCode() {
+		return senderCode;
+	}
+	public void setSenderCode(String senderCode) {
+		this.senderCode = senderCode;
 	}
 	
 	

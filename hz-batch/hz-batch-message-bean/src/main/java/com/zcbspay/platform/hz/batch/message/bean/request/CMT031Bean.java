@@ -68,7 +68,7 @@ public class CMT031Bean implements Serializable {
 	/**
 	 * 附言
 	 */
-	private String postscript;
+	private String postscript="";
 	/**
 	 * 附加域子类
 	 */
@@ -84,7 +84,7 @@ public class CMT031Bean implements Serializable {
 	/**
 	 * 附加域内容
 	 */
-	private String additionContent;
+	private String additionContent="";
 	
 	@Override
 	public String toString() {
@@ -99,15 +99,15 @@ public class CMT031Bean implements Serializable {
 		buffer.append(String.format("%1$-30s",creditorAccountNo));
 		buffer.append(currencyCode);
 		buffer.append(StringUtils.leftPad(String.valueOf(amount), 12, "0"));
-		buffer.append(meteringCode);
-		buffer.append(empowerCode);
+		buffer.append(String.format("%1$-20s",meteringCode));
+		buffer.append(String.format("%1$-12s",empowerCode));
 		buffer.append(accountType);
-		buffer.append(voucherCode);
+		buffer.append(String.format("%1$-16s",voucherCode));
 		buffer.append(String.format("%1$-16s",postscript));
 		buffer.append(additionSubclass);
 		buffer.append(additionLength);
 		buffer.append(msgAuthCode);
-		buffer.append(additionContent);
+		buffer.append(String.format("%1$-46s",additionContent));
 		return buffer.toString();
 	}
 	
@@ -117,21 +117,19 @@ public class CMT031Bean implements Serializable {
 		buffer.append(commitDate);
 		buffer.append(txId);
 		buffer.append(debtorBranchNo);
-		buffer.append(debtorAccountNo);
+		buffer.append(String.format("%1$-30s",debtorAccountNo));
 		buffer.append(String.format("%1$-60s",debtorName));
 		buffer.append(creditorBranchCode);
-		buffer.append(creditorAccountNo);
+		buffer.append(String.format("%1$-30s",creditorAccountNo));
 		buffer.append(currencyCode);
 		buffer.append(StringUtils.leftPad(String.valueOf(amount), 12, "0"));
-		buffer.append(meteringCode);
-		buffer.append(empowerCode);
+		buffer.append(String.format("%1$-20s",meteringCode));
+		buffer.append(String.format("%1$-12s",empowerCode));
 		buffer.append(accountType);
-		buffer.append(voucherCode);
+		buffer.append(String.format("%1$-16s",voucherCode));
 		buffer.append(String.format("%1$-16s",postscript));
 		buffer.append(additionSubclass);
 		buffer.append(additionLength);
-		buffer.append(msgAuthCode);
-		//buffer.append(additionContent);
 		return buffer.toString();
 	}
 	
@@ -249,6 +247,8 @@ public class CMT031Bean implements Serializable {
 	public void setAdditionContent(String additionContent) {
 		this.additionContent = additionContent;
 	}
+	
+	
 	
 	
 }

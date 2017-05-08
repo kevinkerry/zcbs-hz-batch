@@ -45,8 +45,8 @@ public class MessageUnpackImpl implements MessageUnpack {
 					
 					break;
 				case AUT032://协议下载
-					messageBean = createAUT032(body,messageHead);
-					businessMessageReceiver.downloadProtocol(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
+					//messageBean = createAUT032(body,messageHead);
+					//businessMessageReceiver.downloadProtocol(BeanCopyUtil.copyBean(com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean.class, messageBean));
 					break;
 				case CMT031://签到 报文体一条，长度43
 					

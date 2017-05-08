@@ -102,6 +102,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	public ResultBean batchCollectionCharges(BatchCollectionChargesBean collectionChargesBean) throws HZBatchBusinessMessageException {
 		MessageBean messageBean = new MessageBean();
 		messageBean.setMessageTypeEnum(MessageTypeEnum.CMT031);
+		messageBean.setSenderCode(collectionChargesBean.getSenderCode());
 		MessageHead messageHead = null;
 		try {
 			messageHead = messageAssemble.createMessageHead(messageBean);
@@ -148,7 +149,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			cmt031Bean.setEmpowerCode(detaBean.getEmpowerCode());
 			cmt031Bean.setAccountType(detaBean.getAccountType());
 			cmt031Bean.setVoucherCode(detaBean.getVoucherCode());
-			cmt031Bean.setPostscript(detaBean.getSummary());
+			cmt031Bean.setPostscript(detaBean.getSummary()==null?"":detaBean.getSummary());
 			cmt031Bean.setAdditionSubclass("Y0");
 			cmt031Bean.setAdditionLength("000");
 			cmt031Bean.setAdditionContent("");
@@ -212,6 +213,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	@Override
 	public ResultBean batchPayment(BatchPaymentBean paymentBean) throws HZBatchBusinessMessageException {
 		MessageBean messageBean = new MessageBean();
+		messageBean.setSenderCode(paymentBean.getSenderCode());
 		messageBean.setMessageTypeEnum(MessageTypeEnum.CMT036);
 		MessageHead messageHead = null;
 		try {
@@ -232,7 +234,6 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		chnPaymentBatch.setTotalamt(Long.valueOf(paymentBean.getTotalAmt()));
 		chnPaymentBatch.setOperatorcode(messageHead.getOperator());
 		chnPaymentBatch.setOrigbatchno(paymentBean.getBatchNo());
-		
 		try {
 			chnPaymentBatch = chnPaymentBatchDAO.savePaymentBatch(chnPaymentBatch);
 		} catch (Exception e) {
@@ -255,7 +256,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			cmt036Bean.setCurrencyCode(detaBean.getCurrencyCode());
 			cmt036Bean.setAmount(detaBean.getAmount());
 			cmt036Bean.setAccountType(detaBean.getAccountType());
-			cmt036Bean.setPostscript(detaBean.getPostscript());
+			cmt036Bean.setPostscript(detaBean.getPostscript()==null?"":detaBean.getPostscript());
 			cmt036Bean.setAdditionSubclass("Y0");
 			cmt036Bean.setAdditionLength("000");
 			msgList.add(cmt036Bean);

@@ -111,11 +111,11 @@ public class MessageSenderImpl implements MessageSender {
 				String rcvedFName = yht_JNI.recvYHTBWFile(Constant.getInstance().getJni_IP(), Constant.getInstance().getJni_prot(), msg.getFileName(),Constant.getInstance().getFilePath());
 				logger.info("recvYHTBWFile return code:"+rcvedFName);
 				if(rcvedFName.equals("-1")){//
-					
+					logger.info("连接出错");
 				}else if(rcvedFName.equals("-2")){//
-					
+					logger.info("发送报文数据出错");
 				}else if(rcvedFName.equals("-3")){//
-					
+					logger.info("接收报文数据出错");
 				}else{
 					try {
 						fileRead(rcvedFName);

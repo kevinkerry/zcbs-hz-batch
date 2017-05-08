@@ -80,6 +80,7 @@ public class CollectBillBean implements Serializable {
 	 * 清算标志
 	 */
 	private String settFlag;
+	
 	public String getDebtorUnitCode() {
 		return debtorUnitCode;
 	}

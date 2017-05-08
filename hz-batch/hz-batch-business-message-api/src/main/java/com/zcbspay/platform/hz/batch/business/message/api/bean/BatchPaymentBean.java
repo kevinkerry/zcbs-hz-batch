@@ -27,7 +27,10 @@ public class BatchPaymentBean implements Serializable{
 	 * 总金额
 	 */
 	private String totalAmt;
-	
+	/**
+	 * 发送方代码
+	 */
+	private String senderCode;
 	private List<PaymentDetaBean> detaList;
 
 	public String getBatchNo() {
@@ -68,6 +71,14 @@ public class BatchPaymentBean implements Serializable{
 
 	public void setDetaList(List<PaymentDetaBean> detaList) {
 		this.detaList = detaList;
+	}
+
+	public String getSenderCode() {
+		return senderCode;
+	}
+
+	public void setSenderCode(String senderCode) {
+		this.senderCode = senderCode;
 	}
 	
 	

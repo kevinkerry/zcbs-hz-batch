@@ -57,7 +57,7 @@ public class CMT036Bean implements Serializable{
 	/**
 	 * 附言
 	 */
-	private String postscript;
+	private String postscript="";
 	/**
 	 * 附加域子类
 	 */

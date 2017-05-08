@@ -33,9 +33,9 @@ import com.zcbspay.platform.support.cipher.software.api.MACSoftwareService;
 @Service("messageAssemble")
 public class MessageAssembleImpl implements MessageAssemble{
 
-	@Reference(version="1.0")
+	@Reference(version="1.0",timeout=30000)
 	private MACSoftwareService macSoftwareService;
-	@Reference(version="1.0")
+	@Reference(version="1.0",timeout=30000)
 	private MACHardwareService macHardwareService;
 	@Override
 	public MessageHead createMessageHead(MessageBean bean) throws HZBatchTransferMessageException{
@@ -51,7 +51,7 @@ public class MessageAssembleImpl implements MessageAssemble{
 				messageHead.setOperator(Constant.getInstance().getOperatorCode());
 				messageHead.setReceiverCode(Constant.getInstance().getReceiverCode());
 				messageHead.setRspCode("99");//固定值
-				messageHead.setSenderCode(Constant.getInstance().getSenderCode());
+				messageHead.setSenderCode(bean.getSenderCode());
 				messageHead.setServiceType("01");//固定值
 				break;
 			case CMT036:
@@ -61,7 +61,7 @@ public class MessageAssembleImpl implements MessageAssemble{
 				messageHead.setOperator(Constant.getInstance().getOperatorCode());
 				messageHead.setReceiverCode(Constant.getInstance().getReceiverCode());
 				messageHead.setRspCode("99");//固定值
-				messageHead.setSenderCode(Constant.getInstance().getSenderCode());
+				messageHead.setSenderCode(bean.getSenderCode());
 				messageHead.setServiceType("04");//固定值
 				break;
 			case DLD037:
@@ -71,7 +71,7 @@ public class MessageAssembleImpl implements MessageAssemble{
 				messageHead.setOperator(Constant.getInstance().getOperatorCode());
 				messageHead.setReceiverCode(Constant.getInstance().getReceiverCode());
 				messageHead.setRspCode("99");//固定值
-				messageHead.setSenderCode(Constant.getInstance().getSenderCode());
+				messageHead.setSenderCode(bean.getSenderCode());
 				messageHead.setServiceType("07");//固定值
 				break;
 			case CMT031:
@@ -81,7 +81,7 @@ public class MessageAssembleImpl implements MessageAssemble{
 				messageHead.setOperator(Constant.getInstance().getOperatorCode());
 				messageHead.setReceiverCode(Constant.getInstance().getReceiverCode());
 				messageHead.setRspCode("99");//固定值
-				messageHead.setSenderCode(Constant.getInstance().getSenderCode());
+				messageHead.setSenderCode(bean.getSenderCode());
 				messageHead.setServiceType("04");//固定值
 				break;
 			case DLD032:
@@ -91,7 +91,7 @@ public class MessageAssembleImpl implements MessageAssemble{
 				messageHead.setOperator(Constant.getInstance().getOperatorCode());
 				messageHead.setReceiverCode(Constant.getInstance().getReceiverCode());
 				messageHead.setRspCode("99");//固定值
-				messageHead.setSenderCode(Constant.getInstance().getSenderCode());
+				messageHead.setSenderCode(bean.getSenderCode());
 				messageHead.setServiceType("07");//固定值
 				break;
 			case AUT031:
@@ -140,46 +140,31 @@ public class MessageAssembleImpl implements MessageAssemble{
 				List<CMT036Bean> cmt036BeanList =  (List<CMT036Bean>) bean.getMessageBean();
 				for(CMT036Bean cmt036Bean : cmt036BeanList){
 					//cmt036Bean.signature();//待签名的字符串
-					
 					mac = macHardwareService.genANSI_x9_9_MAC(1, "E408C01308B5DFD1", cmt036Bean.signature());
 					if(mac==null){
 						cmt036Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("3030303030303030", cmt036Bean.signature()));
-					}
-					if(mac==null){
-						throw new HZBatchTransferMessageException("");
 					}else{
 						cmt036Bean.setMsgAuthCode(mac);
 					}
-					
 					msgBuffer.append(cmt036Bean.toString());
 				}
 				return msgBuffer.toString();
 			case DLD037:
 				DLD037Bean dld037Bean =  (DLD037Bean) bean.getMessageBean();
-				//dld037Bean.signature();//待签名的字符串
 				mac = macHardwareService.genANSI_x9_9_MAC(1, "E408C01308B5DFD1", dld037Bean.signature());
 				if(mac==null){
-					mac = macSoftwareService.genANSI_x9_9_MAC("3030303030303030", dld037Bean.signature());
-					
-				}
-				if(mac==null){
-					throw new HZBatchTransferMessageException("");
+					dld037Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("3030303030303030", dld037Bean.signature()));
 				}else{
 					dld037Bean.setMsgAuthCode(mac);
 				}
-				
 				return dld037Bean.toString();
-			case CMT031:
+			case CMT031://代收
 				List<CMT031Bean> cmt031BeanList =  (List<CMT031Bean>) bean.getMessageBean();
 				for(CMT031Bean cmt031Bean : cmt031BeanList){
 					//cmt031Bean.signature();//待签名的字符串
 					mac = macHardwareService.genANSI_x9_9_MAC(1, "E408C01308B5DFD1", cmt031Bean.signature());
 					if(mac==null){
-						mac = macSoftwareService.genANSI_x9_9_MAC("3030303030303030", cmt031Bean.signature());
-						
-					}
-					if(mac==null){
-						throw new HZBatchTransferMessageException("");
+						cmt031Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("3030303030303030", cmt031Bean.signature()));
 					}else{
 						cmt031Bean.setMsgAuthCode(mac);
 					}
@@ -188,14 +173,9 @@ public class MessageAssembleImpl implements MessageAssemble{
 				return msgBuffer.toString();
 			case DLD032:
 				DLD032Bean dld032Bean =  (DLD032Bean) bean.getMessageBean();
-				//dld032Bean.signature();//待签名的字符串
 				mac = macHardwareService.genANSI_x9_9_MAC(1, "E408C01308B5DFD1", dld032Bean.signature());
 				if(mac==null){
-					mac = macSoftwareService.genANSI_x9_9_MAC("3030303030303030", dld032Bean.signature());
-					
-				}
-				if(mac==null){
-					throw new HZBatchTransferMessageException("");
+					dld032Bean.setMsgAuthCode(macSoftwareService.genANSI_x9_9_MAC("3030303030303030", dld032Bean.signature()));
 				}else{
 					dld032Bean.setMsgAuthCode(mac);
 				}

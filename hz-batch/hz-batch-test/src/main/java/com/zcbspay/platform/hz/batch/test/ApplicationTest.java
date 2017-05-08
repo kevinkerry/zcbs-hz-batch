@@ -1,7 +1,9 @@
 package com.zcbspay.platform.hz.batch.test;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,18 +20,34 @@ import com.zcbspay.platform.hz.batch.application.interfaces.Producer;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.ProtocolSignBean;
 
 public class ApplicationTest extends BaseTest {
-
+	
 	@Autowired
 	@Qualifier("hzBatchSpringProducer")
 	private Producer hzBatchSpringProducer;
 	@Test
 	public void test(){
-		//批量代收
-		test_batch_collect("170405061000000024");
-		//批量代付
-		//test_batch_payment("170330061000000021");
-		//下载对账文件
-		//test_download_bill("20170327","01");
+		ResourceBundle RESOURCE = ResourceBundle.getBundle("hz_batch_test");
+		String collect_tn = RESOURCE.getString("collect_tn");
+		String payment_tn = RESOURCE.getString("payment_tn");
+		String download_bill_date = RESOURCE.getString("download_bill_date");
+		String sign_in_out = RESOURCE.getString("sign_in_out");
+		if(StringUtils.isNotEmpty(collect_tn)){
+			//批量代收
+			test_batch_collect(collect_tn);
+		}
+		if(StringUtils.isNotEmpty(payment_tn)){
+			//批量代付
+			test_batch_payment(payment_tn);
+		}
+		if(StringUtils.isNotEmpty(download_bill_date)){
+			//下载对账文件
+			test_download_bill(download_bill_date,"01");
+			test_download_bill(download_bill_date,"02");
+		}
+		if(StringUtils.isNotEmpty(sign_in_out)){
+			test_sign_in_out(sign_in_out);
+		}
+		
 		//签到签退
 		//test_sign_in_out("01");
 		//协议下载
@@ -146,5 +164,10 @@ public class ApplicationTest extends BaseTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static void main(String[] args) {
+		
+		System.out.println("3310062091201705080310005133101103016228480018543668976           郭佳                                                          3310130601213582310310001               RMB000000000100                                0                null            Y0000".length());
 	}
 }

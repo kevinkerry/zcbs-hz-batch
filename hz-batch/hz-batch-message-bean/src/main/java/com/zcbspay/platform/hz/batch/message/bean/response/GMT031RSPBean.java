@@ -41,6 +41,20 @@ public class GMT031RSPBean implements Serializable {
 	 * 消息鉴别码
 	 */
 	private String msgAuthCode;
+	
+	
+	public String signature() {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append(signInCode);
+		buffer.append(signInDate);
+		buffer.append(signInTime);
+		buffer.append(rspCode);
+		buffer.append(operator);
+		buffer.append(signInType);
+		return buffer.toString();
+	}
+	
+	
 	public MessageHead getMessageHead() {
 		return messageHead;
 	}

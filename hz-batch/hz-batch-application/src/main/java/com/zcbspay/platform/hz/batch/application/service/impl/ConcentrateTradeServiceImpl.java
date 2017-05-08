@@ -21,11 +21,12 @@ import com.zcbspay.platform.hz.batch.business.message.api.bean.ResultBean;
 import com.zcbspay.platform.hz.batch.business.message.exception.HZBatchBusinessMessageException;
 import com.zcbspay.platform.hz.batch.common.utils.DateUtil;
 import com.zcbspay.platform.hz.batch.dao.ChnAgreementDAO;
+import com.zcbspay.platform.hz.batch.dao.ContractDAO;
 import com.zcbspay.platform.hz.batch.dao.OrderCollectBatchDAO;
 import com.zcbspay.platform.hz.batch.dao.OrderCollectDetaDAO;
 import com.zcbspay.platform.hz.batch.dao.OrderPaymentBatchDAO;
 import com.zcbspay.platform.hz.batch.dao.OrderPaymentDetaDAO;
-import com.zcbspay.platform.hz.batch.pojo.ChnAgreementDO;
+import com.zcbspay.platform.hz.batch.pojo.ContractDO;
 import com.zcbspay.platform.hz.batch.pojo.OrderCollectBatchDO;
 import com.zcbspay.platform.hz.batch.pojo.OrderCollectDetaDO;
 import com.zcbspay.platform.hz.batch.pojo.OrderPaymentBatchDO;
@@ -44,6 +45,8 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 	private ChnAgreementDAO chnAgreementDAO;
 	@Autowired
 	private OrderPaymentBatchDAO orderPaymentBatchDAO;
+	@Autowired
+	private ContractDAO contractDAO;
 	@Autowired
 	private OrderPaymentDetaDAO orderPaymentDetaDAO;
 	@Reference(version="1.0")
@@ -69,6 +72,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		if(StringUtils.isEmpty(merchantBean.getChargingunit())){
 			throw new HZBatchApplicationException("HZB005");
 		}
+		String senderCode = null;
 		for(OrderCollectDetaDO collectDeta : detaOrderList){
 			if("00".equals(collectDeta.getStatus())){//状态为交易成功的交易忽略
 				continue;
@@ -83,11 +87,23 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 			detaBean.setCreditorAccountNo(collectDeta.getCreditoraccount());
 			detaBean.setCurrencyCode("RMB");
 			detaBean.setAmount(collectDeta.getAmt());
-			ChnAgreementDO agreement = chnAgreementDAO.getAgreement(merchantBean.getChargingunit(), collectDeta.getCreditoraccount());
-			detaBean.setMeteringCode(agreement.getMeterobjnumber());//计量对象号码 从代收委托协议表中获取
-			detaBean.setEmpowerCode(agreement.getEntrustnum());//授权号 从代收委托协议表中获取
-			detaBean.setAccountType("0");//支付工具类型:0-未知1-活期储蓄存折2-对公账户3-借记卡4-信用卡（贷记卡）5-活期存款账户
-			detaBean.setVoucherCode("");//凭证号码 不清楚
+			
+			ContractDO contract = contractDAO.getContract(orderCollectBatch.getMerid(), collectDeta.getDebtorconsign());
+			if(contract!=null){
+				senderCode = contract.getCategoryPurpose();
+				if(senderCode!=null){
+					if(senderCode!=contract.getCategoryPurpose()){
+						throw new HZBatchApplicationException("HZB005");
+					}
+				}
+				detaBean.setMeteringCode(contract.getChargeno());//计量对象号码 从代收委托协议表中获取
+				detaBean.setEmpowerCode(contract.getChargeContract());//授权号 从代收委托协议表中获取
+			}else{
+				detaBean.setMeteringCode("0000000");//计量对象号码 从代收委托协议表中获取
+				detaBean.setEmpowerCode("000000000000");//授权号 从代收委托协议表中获取
+			}
+			detaBean.setAccountType("3");//支付工具类型:0-未知1-活期储蓄存折2-对公账户3-借记卡4-信用卡（贷记卡）5-活期存款账户
+			detaBean.setVoucherCode("");//凭证号码 非必填
 			detaBean.setTxnseqno(collectDeta.getRelatetradetxn());
 			detaList.add(detaBean);
 		}
@@ -96,6 +112,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		batchBean.setTotalAmt(orderCollectBatch.getTotalamt()+"");
 		batchBean.setTotalCount(orderCollectBatch.getTotalqty()+"");
 		batchBean.setDetaList(detaList);
+		batchBean.setSenderCode(senderCode);
 		//批次状态和明细状态修改为正在交易中（02）
 		orderCollectBatchDAO.updateOrderToPay(tradeBean.getTn());
 		orderCollectDetaDAO.updateOrderToPay(orderCollectBatch.getTid());
@@ -129,6 +146,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		if(StringUtils.isEmpty(merchantBean.getChargingunit())){
 			throw new HZBatchApplicationException("HZB005");
 		}
+		String senderCode = null;
 		for(OrderPaymentDetaDO orderDeta : orderList){
 			if("00".equals(orderDeta.getStatus())){//状态为交易成功的交易忽略，防止交易成功订单重复支付
 				continue;
@@ -139,11 +157,22 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 			detaBean.setCreditorBranchCode(orderDeta.getCreditorbank());
 			detaBean.setCreditorAccountNo(orderDeta.getCreditoraccount());
 			detaBean.setCreditorName(orderDeta.getCreditorname());
-			detaBean.setDebtorContract(orderDeta.getDebtorconsign());
+			ContractDO contract = contractDAO.getContract(paymentBatchOrder.getMerid(), orderDeta.getDebtorconsign());
+			if(contract!=null){
+				senderCode = contract.getCategoryPurpose();
+				if(senderCode!=null){
+					if(senderCode!=contract.getCategoryPurpose()){
+						throw new HZBatchApplicationException("HZB005");
+					}
+				}
+				detaBean.setDebtorContract(contract.getPayContract());
+			}else{
+				detaBean.setDebtorContract(orderDeta.getDebtorconsign());
+			}
 			detaBean.setDebtorAccountNo(orderDeta.getDebtoraccount());
 			detaBean.setCurrencyCode(orderDeta.getCurrencycode());
 			detaBean.setAmount(orderDeta.getAmt());
-			detaBean.setAccountType("0");
+			detaBean.setAccountType("3");
 			detaBean.setPostscript(orderDeta.getSummary());
 			detaBean.setTxnseqno(orderDeta.getRelatetradetxn());
 			detaList.add(detaBean);
@@ -153,6 +182,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		paymentBean.setTotalAmt(paymentBatchOrder.getTotalamt()+"");
 		paymentBean.setTotalCount(paymentBatchOrder.getTotalqty()+"");
 		paymentBean.setDetaList(detaList);
+		paymentBean.setSenderCode(senderCode);
 		//批次状态和明细状态修改为正在交易中（02）
 		orderPaymentBatchDAO.updateOrderToPay(tradeBean.getTn());
 		orderPaymentDetaDAO.updateOrderToPay(paymentBatchOrder.getTid());

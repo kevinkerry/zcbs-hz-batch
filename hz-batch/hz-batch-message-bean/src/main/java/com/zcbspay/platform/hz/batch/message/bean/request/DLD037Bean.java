@@ -45,8 +45,6 @@ public class DLD037Bean implements Serializable{
 		buffer.append(String.format("%1$-2s", downloadType));
 		buffer.append(String.format("%1$-8s", localDate));
 		buffer.append(String.format("%1$-6s", localTime));
-		buffer.append(String.format("%1$-10s", senderCode));
-		buffer.append(String.format("%1$-10s", senderCode));
 		buffer.append(String.format("%1$-8s", operator));
 		buffer.append(String.format("%1$-8s", msgAuthCode));
 		return buffer.toString();
@@ -58,8 +56,6 @@ public class DLD037Bean implements Serializable{
 		buffer.append(String.format("%1$-2s", downloadType));
 		buffer.append(String.format("%1$-8s", localDate));
 		buffer.append(String.format("%1$-6s", localTime));
-		buffer.append(String.format("%1$-10s", senderCode));
-		buffer.append(String.format("%1$-10s", senderCode));
 		buffer.append(String.format("%1$-8s", operator));
 		return buffer.toString();
 	}
