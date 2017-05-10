@@ -51,7 +51,7 @@ public class MessageAssembleImpl implements MessageAssemble{
 				messageHead.setOperator(Constant.getInstance().getOperatorCode());
 				messageHead.setReceiverCode(Constant.getInstance().getReceiverCode());
 				messageHead.setRspCode("99");//固定值
-				messageHead.setSenderCode(bean.getSenderCode());
+				messageHead.setSenderCode(bean.getSendCode());
 				messageHead.setServiceType("01");//固定值
 				break;
 			case CMT036:
@@ -61,7 +61,18 @@ public class MessageAssembleImpl implements MessageAssemble{
 				messageHead.setOperator(Constant.getInstance().getOperatorCode());
 				messageHead.setReceiverCode(Constant.getInstance().getReceiverCode());
 				messageHead.setRspCode("99");//固定值
-				messageHead.setSenderCode(bean.getSenderCode());
+				messageHead.setSenderCode(bean.getSendCode());
+				messageHead.setServiceType("04");//固定值
+				break;
+			
+			case CMT031:
+				messageHead.setLocalDate(DateUtil.getCurrentDate());
+				messageHead.setLocalTime(DateUtil.getCurrentTime());
+				messageHead.setMsgType(messageType.name());
+				messageHead.setOperator(Constant.getInstance().getOperatorCode());
+				messageHead.setReceiverCode(Constant.getInstance().getReceiverCode());
+				messageHead.setRspCode("99");//固定值
+				messageHead.setSenderCode(bean.getSendCode());
 				messageHead.setServiceType("04");//固定值
 				break;
 			case DLD037:
@@ -71,18 +82,8 @@ public class MessageAssembleImpl implements MessageAssemble{
 				messageHead.setOperator(Constant.getInstance().getOperatorCode());
 				messageHead.setReceiverCode(Constant.getInstance().getReceiverCode());
 				messageHead.setRspCode("99");//固定值
-				messageHead.setSenderCode(bean.getSenderCode());
+				messageHead.setSenderCode(bean.getSendCode());
 				messageHead.setServiceType("07");//固定值
-				break;
-			case CMT031:
-				messageHead.setLocalDate(DateUtil.getCurrentDate());
-				messageHead.setLocalTime(DateUtil.getCurrentTime());
-				messageHead.setMsgType(messageType.name());
-				messageHead.setOperator(Constant.getInstance().getOperatorCode());
-				messageHead.setReceiverCode(Constant.getInstance().getReceiverCode());
-				messageHead.setRspCode("99");//固定值
-				messageHead.setSenderCode(bean.getSenderCode());
-				messageHead.setServiceType("04");//固定值
 				break;
 			case DLD032:
 				messageHead.setLocalDate(DateUtil.getCurrentDate());
@@ -91,10 +92,10 @@ public class MessageAssembleImpl implements MessageAssemble{
 				messageHead.setOperator(Constant.getInstance().getOperatorCode());
 				messageHead.setReceiverCode(Constant.getInstance().getReceiverCode());
 				messageHead.setRspCode("99");//固定值
-				messageHead.setSenderCode(bean.getSenderCode());
+				messageHead.setSenderCode(bean.getSendCode());
 				messageHead.setServiceType("07");//固定值
 				break;
-			case AUT031:
+			/*case AUT031:
 				messageHead.setLocalDate(DateUtil.getCurrentDate());
 				messageHead.setLocalTime(DateUtil.getCurrentTime());
 				messageHead.setMsgType(messageType.name());
@@ -113,7 +114,7 @@ public class MessageAssembleImpl implements MessageAssemble{
 				messageHead.setRspCode("99");//固定值
 				messageHead.setSenderCode(Constant.getInstance().getSenderCode());
 				messageHead.setServiceType("07");//固定值
-				break;
+				break;*/
 			default:
 				break;
 		}

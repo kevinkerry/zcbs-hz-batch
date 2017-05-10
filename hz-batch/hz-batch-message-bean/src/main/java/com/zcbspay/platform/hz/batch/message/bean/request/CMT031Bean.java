@@ -1,6 +1,11 @@
 package com.zcbspay.platform.hz.batch.message.bean.request;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -94,7 +99,7 @@ public class CMT031Bean implements Serializable {
 		buffer.append(txId);
 		buffer.append(debtorBranchNo);
 		buffer.append(String.format("%1$-30s",debtorAccountNo));
-		buffer.append(String.format("%1$-60s",debtorName));
+		buffer.append(StringUtils.rightPad(debtorName, 60-debtorName.length(), ""));
 		buffer.append(creditorBranchCode);
 		buffer.append(String.format("%1$-30s",creditorAccountNo));
 		buffer.append(currencyCode);
@@ -118,7 +123,9 @@ public class CMT031Bean implements Serializable {
 		buffer.append(txId);
 		buffer.append(debtorBranchNo);
 		buffer.append(String.format("%1$-30s",debtorAccountNo));
-		buffer.append(String.format("%1$-60s",debtorName));
+		
+		buffer.append(StringUtils.rightPad(debtorName, 60-debtorName.length(), ""));
+		
 		buffer.append(creditorBranchCode);
 		buffer.append(String.format("%1$-30s",creditorAccountNo));
 		buffer.append(currencyCode);
@@ -249,6 +256,34 @@ public class CMT031Bean implements Serializable {
 	}
 	
 	
-	
+	public static void main(String[] args) throws IOException {
+		try {
+			
+			
+			String debtorName = "郭佳";
+			System.out.println((StringUtils.rightPad(debtorName, 60-debtorName.length(), "")).getBytes("GBK").length);
+			/*int length = 60-txt.length();
+			System.out.println(length);
+			String leftPad = StringUtils.rightPad(txt, length, "");
+			System.out.println(leftPad);
+			System.out.println("郭佳                                                        ".getBytes("GBK").length);
+			
+			String txts = "郭佳                                                        12343";
+			
+			byte[] bytes = txts.getBytes("GBK");
+			byte[] read = new byte[60];
+			ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(bytes);
+			arrayInputStream.read(read);
+			String test =  new String(read,"GBK");
+			System.out.println(test.length());*/
+			//BufferedReader br = new BufferedReader(arrayInputStream);
+			
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 	
 }

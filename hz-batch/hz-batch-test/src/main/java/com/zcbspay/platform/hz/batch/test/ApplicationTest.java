@@ -31,6 +31,7 @@ public class ApplicationTest extends BaseTest {
 		String payment_tn = RESOURCE.getString("payment_tn");
 		String download_bill_date = RESOURCE.getString("download_bill_date");
 		String sign_in_out = RESOURCE.getString("sign_in_out");
+		String merchno = RESOURCE.getString("debtorunitcode");
 		if(StringUtils.isNotEmpty(collect_tn)){
 			//批量代收
 			test_batch_collect(collect_tn);
@@ -41,8 +42,8 @@ public class ApplicationTest extends BaseTest {
 		}
 		if(StringUtils.isNotEmpty(download_bill_date)){
 			//下载对账文件
-			test_download_bill(download_bill_date,"01");
-			test_download_bill(download_bill_date,"02");
+			test_download_bill(download_bill_date,"01",merchno);
+			test_download_bill(download_bill_date,"02",merchno);
 		}
 		if(StringUtils.isNotEmpty(sign_in_out)){
 			test_sign_in_out(sign_in_out);
@@ -118,13 +119,14 @@ public class ApplicationTest extends BaseTest {
 		}
 	}
 
-	private void test_download_bill(String billdate, String billtype) {
+	private void test_download_bill(String billdate, String billtype,String merchno) {
 		// TODO Auto-generated method stub
 		try {
 			HZBatchEnum hzBatch = HZBatchEnum.DOWNLOAD_BILL;
 			TradeBean tradeBean = new TradeBean();
 			tradeBean.setBillDate(billdate);
 			tradeBean.setBillOperateType(billtype);
+			tradeBean.setDebtorUnitCode(merchno);
 			SendResult sendResult = hzBatchSpringProducer.sendJsonMessage(JSON.toJSONString(tradeBean), hzBatch);
 			System.out.println(JSON.toJSONString(sendResult));
 		} catch (MQClientException | RemotingException | InterruptedException

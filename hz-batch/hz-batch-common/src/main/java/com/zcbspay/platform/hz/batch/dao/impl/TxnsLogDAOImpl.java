@@ -180,7 +180,8 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<TxnsLogDO> implements
 		RspmsgDO rspmsg = rspmsgDAO.getRspmsgByChnlCode(ChnlTypeEnum.HZ, payPartyBean.getPayretcode());
 		if(rspmsg==null){
 			rspmsg = new RspmsgDO();
-			rspmsg.setRspinfo("未知异常");
+			rspmsg.setWebrspcode("9999");
+			rspmsg.setRspinfo("交易失败,未知异常");
 		}
 		String hql = "update TxnsLogDO set payordfintime = ?, payretcode = ?, payretinfo = ?, accordfintime = ?,retdatetime=?,tradetxnflag=?,tradestatflag = ?,relate=?,tradeseltxn=?,retcode = ?,retinfo = ?  where payordno=?";
 		Query query = getSession().createQuery(hql);

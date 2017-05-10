@@ -79,7 +79,7 @@ public class CMT036Bean implements Serializable{
 		buffer.append(String.format("%1$-8s", txId));
 		buffer.append(String.format("%1$-12s", creditorBranchCode));
 		buffer.append(String.format("%1$-30s", creditorAccountNo));
-		buffer.append(String.format("%1$-60s", creditorName));
+		buffer.append(StringUtils.rightPad(creditorName, 60-creditorName.length(), ""));
 		buffer.append(String.format("%1$-12s", debtorContract));
 		buffer.append(String.format("%1$-30s", debtorAccountNo));
 		buffer.append(String.format("%1$-3s", currencyCode));
@@ -98,7 +98,7 @@ public class CMT036Bean implements Serializable{
 		buffer.append(String.format("%1$-8s", txId));
 		buffer.append(String.format("%1$-12s", creditorBranchCode));
 		buffer.append(String.format("%1$-30s", creditorAccountNo));
-		buffer.append(String.format("%1$-60s", creditorName));
+		buffer.append(StringUtils.rightPad(creditorName, 60-creditorName.length(), ""));
 		buffer.append(String.format("%1$-12s", debtorContract));
 		buffer.append(String.format("%1$-30s", debtorAccountNo));
 		buffer.append(String.format("%1$-3s", currencyCode));

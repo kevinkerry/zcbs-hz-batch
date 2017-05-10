@@ -16,7 +16,7 @@ public class MessageBean implements Serializable{
 
     private Object messageBean;
     
-    private String senderCode;
+    private String sendCode;
 
     public MessageBean() {
         super();
@@ -49,16 +49,14 @@ public class MessageBean implements Serializable{
         this.messageTypeEnum = messageTypeEnum;
     }
 
-	public String getSenderCode() {
-		return senderCode;
+	public String getSendCode() {
+		return sendCode;
 	}
 
-	public void setSenderCode(String senderCode) {
-		this.senderCode = senderCode;
+	public void setSendCode(String sendCode) {
+		this.sendCode = sendCode;
 	}
 
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
+	
 
 }

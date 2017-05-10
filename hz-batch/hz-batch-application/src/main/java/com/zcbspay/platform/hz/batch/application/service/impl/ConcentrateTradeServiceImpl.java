@@ -22,11 +22,13 @@ import com.zcbspay.platform.hz.batch.business.message.exception.HZBatchBusinessM
 import com.zcbspay.platform.hz.batch.common.utils.DateUtil;
 import com.zcbspay.platform.hz.batch.dao.ChnAgreementDAO;
 import com.zcbspay.platform.hz.batch.dao.ContractDAO;
+import com.zcbspay.platform.hz.batch.dao.HzAgencyInfoDAO;
 import com.zcbspay.platform.hz.batch.dao.OrderCollectBatchDAO;
 import com.zcbspay.platform.hz.batch.dao.OrderCollectDetaDAO;
 import com.zcbspay.platform.hz.batch.dao.OrderPaymentBatchDAO;
 import com.zcbspay.platform.hz.batch.dao.OrderPaymentDetaDAO;
 import com.zcbspay.platform.hz.batch.pojo.ContractDO;
+import com.zcbspay.platform.hz.batch.pojo.HzAgencyInfoDO;
 import com.zcbspay.platform.hz.batch.pojo.OrderCollectBatchDO;
 import com.zcbspay.platform.hz.batch.pojo.OrderCollectDetaDO;
 import com.zcbspay.platform.hz.batch.pojo.OrderPaymentBatchDO;
@@ -49,6 +51,8 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 	private ContractDAO contractDAO;
 	@Autowired
 	private OrderPaymentDetaDAO orderPaymentDetaDAO;
+	@Autowired
+	private HzAgencyInfoDAO hzAgencyInfoDAO;
 	@Reference(version="1.0")
 	private BusinesssMessageSender businesssMessageSender;
 	@Reference(version="1.0") 
@@ -62,6 +66,9 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		BatchCollectionChargesBean batchBean = new BatchCollectionChargesBean();
 		List<CollectionChargesDetaBean> detaList = Lists.newArrayList();
 		OrderCollectBatchDO orderCollectBatch = orderCollectBatchDAO.getCollectBatchOrderByTn(tradeBean.getTn());
+		if(orderCollectBatch==null){
+			throw new HZBatchApplicationException("HZB017");
+		}
 		if("00".equals(orderCollectBatch.getStatus())){//状态为待支付才能进行交易
 			throw new HZBatchApplicationException("HZB001");
 		}else if(!"01".equals(orderCollectBatch.getStatus())){//其他状态的批次订单
@@ -72,7 +79,8 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		if(StringUtils.isEmpty(merchantBean.getChargingunit())){
 			throw new HZBatchApplicationException("HZB005");
 		}
-		String senderCode = null;
+		HzAgencyInfoDO agencyInfo = hzAgencyInfoDAO.getAgencyInfo(orderCollectBatch.getMerid(), "11000003");
+		String senderCode = agencyInfo.getChargingunit();
 		for(OrderCollectDetaDO collectDeta : detaOrderList){
 			if("00".equals(collectDeta.getStatus())){//状态为交易成功的交易忽略
 				continue;
@@ -136,6 +144,9 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		BatchPaymentBean paymentBean = new BatchPaymentBean();
 		List<PaymentDetaBean> detaList = Lists.newArrayList();
 		OrderPaymentBatchDO paymentBatchOrder = orderPaymentBatchDAO.getPaymentBatchOrderByTn(tradeBean.getTn());
+		if(paymentBatchOrder==null){
+			throw new HZBatchApplicationException("HZB018");
+		}
 		if("00".equals(paymentBatchOrder.getStatus())){//状态为待支付才能进行交易
 			throw new HZBatchApplicationException("HZB003");
 		}else if(!"01".equals(paymentBatchOrder.getStatus())){
@@ -146,7 +157,8 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 		if(StringUtils.isEmpty(merchantBean.getChargingunit())){
 			throw new HZBatchApplicationException("HZB005");
 		}
-		String senderCode = null;
+		HzAgencyInfoDO agencyInfo = hzAgencyInfoDAO.getAgencyInfo(paymentBatchOrder.getMerid(), "11000004");
+		String senderCode = agencyInfo.getChargingunit();
 		for(OrderPaymentDetaDO orderDeta : orderList){
 			if("00".equals(orderDeta.getStatus())){//状态为交易成功的交易忽略，防止交易成功订单重复支付
 				continue;
@@ -214,7 +226,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 	public ResultBean downLoadBill(TradeBean tradeBean) {
 		ResultBean resultBean = null;
 		try {
-			resultBean = businesssMessageSender.downLoadBill(tradeBean.getBillDate(), tradeBean.getBillOperateType());
+			resultBean = businesssMessageSender.downLoadBill(tradeBean.getDebtorUnitCode(),tradeBean.getBillDate(), tradeBean.getBillOperateType());
 		} catch (HZBatchBusinessMessageException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

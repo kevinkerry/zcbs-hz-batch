@@ -2,6 +2,8 @@ package com.zcbspay.platform.hz.batch.business.message;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -10,9 +12,7 @@ import org.springframework.stereotype.Service;
 import com.zcbspay.platform.hz.batch.bean.PayPartyBean;
 import com.zcbspay.platform.hz.batch.business.message.api.BusinessMessageReceiver;
 import com.zcbspay.platform.hz.batch.business.message.api.bean.MessageBean;
-import com.zcbspay.platform.hz.batch.business.message.api.bean.MessageTypeEnum;
 import com.zcbspay.platform.hz.batch.business.message.dao.ChnCollectDetaDAO;
-import com.zcbspay.platform.hz.batch.business.message.dao.ChnPaymentBatchDAO;
 import com.zcbspay.platform.hz.batch.business.message.dao.ChnPaymentDetaDAO;
 import com.zcbspay.platform.hz.batch.business.message.dao.ChnProtcolDownLogDAO;
 import com.zcbspay.platform.hz.batch.business.message.dao.ChnReconDownLogDAO;
@@ -42,6 +42,7 @@ import com.zcbspay.platform.hz.batch.pojo.ChnAgreementDO;
 @Service("businessMessageReceiver")
 public class BusinessMessageReceiverImpl implements BusinessMessageReceiver {
 
+	private static final Logger logger = LoggerFactory.getLogger(BusinessMessageReceiverImpl.class);
 	@Autowired
 	private ChnSignInOutLogDAO chnSignInOutLogDAO;
 	@Autowired
@@ -134,7 +135,7 @@ public class BusinessMessageReceiverImpl implements BusinessMessageReceiver {
 	@Override
 	public void downLoadBill(MessageBean messageBean) {
 		ChnReconDownLogDO reconDownLog = new ChnReconDownLogDO();
-		if(messageBean.getMessageTypeEnum()==MessageTypeEnum.DLD032){//代收对账处理
+		if(messageBean.getMessageBean() instanceof DLD032RSPBean){
 			DLD032RSPBean dld032rspBean = (DLD032RSPBean) messageBean.getMessageBean();
 			MessageHead messageHead = dld032rspBean.getMessageHead();
 			reconDownLog.setMsgtype(messageHead .getMsgType());
@@ -181,7 +182,7 @@ public class BusinessMessageReceiverImpl implements BusinessMessageReceiver {
 				payPartyBean.setBusinessEnum(BusinessEnum.CONCENTRATE_COLLECT_BATCH);
 				txnsLogDAO.updatePayInfoResult(payPartyBean);
 			}
-		}else if(messageBean.getMessageTypeEnum()==MessageTypeEnum.DLD037){//代付对账处理
+		}else{
 			DLD037RSPBean dld037rspBean = (DLD037RSPBean) messageBean.getMessageBean();
 			MessageHead messageHead = dld037rspBean.getMessageHead();
 			reconDownLog.setMsgtype(messageHead .getMsgType());
@@ -226,6 +227,12 @@ public class BusinessMessageReceiverImpl implements BusinessMessageReceiver {
 				txnsLogDAO.updatePayInfoResult(payPartyBean);
 			}
 		}
+		
+		/*if(messageBean.getMessageTypeEnum()==MessageTypeEnum.DLD032){//代收对账处理
+			
+		}else if(messageBean.getMessageTypeEnum()==MessageTypeEnum.DLD037){//代付对账处理
+			
+		}*/
 	}
 
 }

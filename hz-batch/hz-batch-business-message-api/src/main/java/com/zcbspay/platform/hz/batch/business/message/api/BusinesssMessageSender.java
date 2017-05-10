@@ -46,7 +46,7 @@ public interface BusinesssMessageSender {
 	 * @param operateType 01:代收 02:代付
 	 * @return
 	 */
-	public ResultBean downLoadBill(String billDate,String operateType) throws HZBatchBusinessMessageException;
+	public ResultBean downLoadBill(String merchNo,String billDate,String operateType) throws HZBatchBusinessMessageException;
 	
 	/**
 	 * 

@@ -43,6 +43,7 @@ import com.zcbspay.platform.hz.batch.business.message.sequence.TradeSequenceServ
 import com.zcbspay.platform.hz.batch.common.constant.Constant;
 import com.zcbspay.platform.hz.batch.common.utils.DateUtil;
 import com.zcbspay.platform.hz.batch.dao.ChnAgreementDAO;
+import com.zcbspay.platform.hz.batch.dao.HzAgencyInfoDAO;
 import com.zcbspay.platform.hz.batch.dao.TxnsLogDAO;
 import com.zcbspay.platform.hz.batch.enums.TradeStatFlagEnum;
 import com.zcbspay.platform.hz.batch.fe.api.MessageSender;
@@ -54,6 +55,7 @@ import com.zcbspay.platform.hz.batch.message.bean.request.CMT036Bean;
 import com.zcbspay.platform.hz.batch.message.bean.request.DLD032Bean;
 import com.zcbspay.platform.hz.batch.message.bean.request.DLD037Bean;
 import com.zcbspay.platform.hz.batch.message.bean.request.GMT031Bean;
+import com.zcbspay.platform.hz.batch.pojo.HzAgencyInfoDO;
 import com.zcbspay.platform.hz.batch.transfer.message.api.assemble.MessageAssemble;
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageBean;
 import com.zcbspay.platform.hz.batch.transfer.message.api.bean.MessageHead;
@@ -70,6 +72,8 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private TradeSequenceService tradeSequenceService;
+	@Autowired
+	private HzAgencyInfoDAO hzAgencyInfoDAO;
 	@Autowired
 	private ChnCollectBatchDAO chnCollectBatchDAO;
 	@Autowired
@@ -102,7 +106,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	public ResultBean batchCollectionCharges(BatchCollectionChargesBean collectionChargesBean) throws HZBatchBusinessMessageException {
 		MessageBean messageBean = new MessageBean();
 		messageBean.setMessageTypeEnum(MessageTypeEnum.CMT031);
-		messageBean.setSenderCode(collectionChargesBean.getSenderCode());
+		messageBean.setSendCode(collectionChargesBean.getSenderCode());
 		MessageHead messageHead = null;
 		try {
 			messageHead = messageAssemble.createMessageHead(messageBean);
@@ -122,6 +126,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		chnCollectBatch.setTotalamt(Long.valueOf(collectionChargesBean.getTotalAmt()));
 		chnCollectBatch.setOperatorcode(messageHead.getOperator());
 		chnCollectBatch.setOrigbatchno(collectionChargesBean.getBatchNo());
+		
 		ChnCollectBatchDO batch;
 		try {
 			batch = chnCollectBatchDAO.saveCollectBatch(chnCollectBatch);
@@ -135,7 +140,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		List<ChnCollectDetaDO> collectDetaList = Lists.newArrayList();
 		for(CollectionChargesDetaBean detaBean : detaList){
 			CMT031Bean cmt031Bean = new CMT031Bean();
-			cmt031Bean.setDebtorUnitCode(detaBean.getDebtorUnitCode());
+			cmt031Bean.setDebtorUnitCode(collectionChargesBean.getSenderCode());
 			cmt031Bean.setCommitDate(detaBean.getCommitDate());
 			cmt031Bean.setTxId(tradeSequenceService.getCMTCollectSeqNo());
 			cmt031Bean.setDebtorBranchNo(detaBean.getDebtorBranchNo());
@@ -150,14 +155,14 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			cmt031Bean.setAccountType(detaBean.getAccountType());
 			cmt031Bean.setVoucherCode(detaBean.getVoucherCode());
 			cmt031Bean.setPostscript(detaBean.getSummary()==null?"":detaBean.getSummary());
-			cmt031Bean.setAdditionSubclass("Y0");
-			cmt031Bean.setAdditionLength("000");
+			cmt031Bean.setAdditionSubclass("50");
+			cmt031Bean.setAdditionLength("046");
 			cmt031Bean.setAdditionContent("");
 			msgList.add(cmt031Bean);
 			ChnCollectDetaDO chnCollectDeta = new ChnCollectDetaDO();
 			chnCollectDeta.setBatchtid(batch.getTid());
 			chnCollectDeta.setBatchno(batch.getBatchno());
-			chnCollectDeta.setChargingunit(detaBean.getDebtorUnitCode());
+			chnCollectDeta.setChargingunit(collectionChargesBean.getSenderCode());
 			chnCollectDeta.setTransdate(detaBean.getCommitDate());
 			chnCollectDeta.setTxid(cmt031Bean.getTxId());
 			chnCollectDeta.setDebtorname(detaBean.getDebtorName());
@@ -213,7 +218,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	@Override
 	public ResultBean batchPayment(BatchPaymentBean paymentBean) throws HZBatchBusinessMessageException {
 		MessageBean messageBean = new MessageBean();
-		messageBean.setSenderCode(paymentBean.getSenderCode());
+		messageBean.setSendCode(paymentBean.getSenderCode());
 		messageBean.setMessageTypeEnum(MessageTypeEnum.CMT036);
 		MessageHead messageHead = null;
 		try {
@@ -245,7 +250,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		List<ChnPaymentDetaDO> paymentDetaList = Lists.newArrayList();
 		for(PaymentDetaBean detaBean : detaList){
 			CMT036Bean cmt036Bean = new CMT036Bean();
-			cmt036Bean.setDebtorUnitCode(detaBean.getDebtorUnitCode());
+			cmt036Bean.setDebtorUnitCode(paymentBean.getSenderCode());
 			cmt036Bean.setCommitDate(detaBean.getCommitDate());
 			cmt036Bean.setTxId(tradeSequenceService.getCMTPaymentSeqNo());
 			cmt036Bean.setCreditorBranchCode(detaBean.getCreditorBranchCode());
@@ -253,7 +258,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			cmt036Bean.setCreditorName(detaBean.getCreditorName());
 			cmt036Bean.setDebtorContract(detaBean.getDebtorContract());
 			cmt036Bean.setDebtorAccountNo(detaBean.getDebtorAccountNo());
-			cmt036Bean.setCurrencyCode(detaBean.getCurrencyCode());
+			cmt036Bean.setCurrencyCode("RMB");
 			cmt036Bean.setAmount(detaBean.getAmount());
 			cmt036Bean.setAccountType(detaBean.getAccountType());
 			cmt036Bean.setPostscript(detaBean.getPostscript()==null?"":detaBean.getPostscript());
@@ -264,7 +269,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			ChnPaymentDetaDO chnCollectDeta = new ChnPaymentDetaDO();
 			chnCollectDeta.setBatchtid(chnPaymentBatch.getTid());
 			chnCollectDeta.setBatchno(chnPaymentBatch.getBatchno());
-			chnCollectDeta.setChargingunit(detaBean.getDebtorUnitCode());
+			chnCollectDeta.setChargingunit(paymentBean.getSenderCode());
 			chnCollectDeta.setTransdate(detaBean.getCommitDate());
 			chnCollectDeta.setTxid(cmt036Bean.getTxId());
 			//chnCollectDeta.setDebtorname(detaBean.getDebtor);
@@ -319,7 +324,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	public ResultBean signInAndSignOut(String operateType) throws HZBatchBusinessMessageException {
 		
 		GMT031Bean gmt031Bean = new GMT031Bean();
-		gmt031Bean.setSignInCode(Constant.getInstance().getSenderCode());
+		gmt031Bean.setSignInCode("3310062091");
 		gmt031Bean.setSignInDate(DateUtil.getCurrentDate());
 		gmt031Bean.setSignInTime(DateUtil.getCurrentTime());
 		gmt031Bean.setRspCode("99");
@@ -335,6 +340,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		MessageBean messageBean = new MessageBean();
 		messageBean.setMessageBean(gmt031Bean);
 		messageBean.setMessageTypeEnum(MessageTypeEnum.GMT031);
+		messageBean.setSendCode("3310062091");
 		MessageHead messageHead = null;
 		try {
 			messageHead = messageAssemble.createMessageHead(messageBean);
@@ -382,12 +388,18 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 	
 
 	@Override
-	public ResultBean downLoadBill(String billDate, String operateType) throws HZBatchBusinessMessageException {
+	public ResultBean downLoadBill(String merchNo,String billDate, String operateType) throws HZBatchBusinessMessageException {
 		ChnReconDownLogDO reconDownLog = new ChnReconDownLogDO();
 		MessageBean messageBean = new MessageBean();
 		if("01".equals(operateType)){//代收
+			HzAgencyInfoDO agencyInfo = hzAgencyInfoDAO.getAgencyInfo(merchNo, "11000003");
+			if(agencyInfo!=null){
+				messageBean.setSendCode(agencyInfo.getChargingunit());
+			}else{
+				messageBean.setSendCode("3310062091");
+			}
 			DLD032Bean dld032Bean = new DLD032Bean();
-			dld032Bean.setSenderCode(Constant.getInstance().getSenderCode());
+			dld032Bean.setSenderCode(messageBean.getSendCode());
 			dld032Bean.setDownloadDate(billDate);
 			dld032Bean.setDownloadType("01");
 			dld032Bean.setLocalDate(DateUtil.getCurrentDate());
@@ -395,6 +407,8 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			dld032Bean.setOperator(Constant.getInstance().getOperatorCode());
 			messageBean.setMessageBean(dld032Bean);
 			messageBean.setMessageTypeEnum(MessageTypeEnum.DLD032);
+			
+			
 			MessageHead messageHead = null;
 			try {
 				messageHead = messageAssemble.createMessageHead(messageBean);
@@ -409,14 +423,20 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			reconDownLog.setTransdate(messageHead.getLocalDate());
 			reconDownLog.setTranstime(messageHead.getLocalTime());
 			reconDownLog.setOperatorcode(messageHead.getOperator());
-			reconDownLog.setSendercode(Constant.getInstance().getSenderCode());
+			reconDownLog.setSendercode(agencyInfo.getChargingunit());
 			reconDownLog.setDownloaddate(billDate);
 			reconDownLog.setDownloadtype("01");
 			reconDownLog.setLocaldate(dld032Bean.getLocalDate());
 			reconDownLog.setLocaltime(dld032Bean.getLocalTime());
 		}else if("02".equals(operateType)){//代付
+			HzAgencyInfoDO agencyInfo = hzAgencyInfoDAO.getAgencyInfo(merchNo, "11000004");
+			if(agencyInfo!=null){
+				messageBean.setSendCode(agencyInfo.getChargingunit());
+			}else{
+				messageBean.setSendCode("3310962099");
+			}
 			DLD037Bean dld037Bean = new DLD037Bean();
-			dld037Bean.setSenderCode(Constant.getInstance().getSenderCode());
+			dld037Bean.setSenderCode(messageBean.getSendCode());
 			dld037Bean.setDownloadDate(billDate);
 			dld037Bean.setDownloadType("01");
 			dld037Bean.setLocalDate(DateUtil.getCurrentDate());
@@ -424,6 +444,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			dld037Bean.setOperator(Constant.getInstance().getOperatorCode());
 			messageBean.setMessageBean(dld037Bean);
 			messageBean.setMessageTypeEnum(MessageTypeEnum.DLD037);
+			
 			MessageHead messageHead = null;
 			try {
 				messageHead = messageAssemble.createMessageHead(messageBean);
@@ -438,7 +459,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			reconDownLog.setTransdate(messageHead.getLocalDate());
 			reconDownLog.setTranstime(messageHead.getLocalTime());
 			reconDownLog.setOperatorcode(messageHead.getOperator());
-			reconDownLog.setSendercode(Constant.getInstance().getSenderCode());
+			reconDownLog.setSendercode(agencyInfo.getChargingunit());
 			reconDownLog.setDownloaddate(billDate);
 			reconDownLog.setDownloadtype("01");
 			reconDownLog.setLocaldate(dld037Bean.getLocalDate());
