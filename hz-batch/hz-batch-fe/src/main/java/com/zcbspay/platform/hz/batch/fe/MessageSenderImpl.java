@@ -117,6 +117,9 @@ public class MessageSenderImpl implements MessageSender {
 						.getJni_IP(), Constant.getInstance().getJni_prot(), msg
 						.getFileName(), path);*/
 				logger.info("sendYHTBWFile return code:" + retcode);
+				if(retcode!=0){
+					return "failed";
+				}
 			} else if (msg.getMsgType().equals("02")) {// 有应答报文或文件
 
 				String rcvedFName = yht_JNI.recvYHTBWFile(Constant
@@ -180,12 +183,13 @@ public class MessageSenderImpl implements MessageSender {
 	public void fileRead(String fileName) throws IOException {
 		fileName = fileName.substring(0, fileName.lastIndexOf("/"))
 				.toLowerCase() + fileName.substring(fileName.lastIndexOf("/"));
+		transferFile2UTF8(fileName, fileName);
 		File file = new File(fileName);
 		if (file.exists()) {
 			FileReader fr = new FileReader(file);
 			BufferedReader br = new BufferedReader(fr);
 			String content = br.readLine();
-			System.out.println(messageUnpack);
+			logger.info("content:"+content);
 			messageUnpack.unpack(content);
 			br.close();
 			fr.close();
@@ -209,6 +213,27 @@ public class MessageSenderImpl implements MessageSender {
 
 		Writer ow = new OutputStreamWriter(new FileOutputStream(destFileName),
 				"GBK");
+		ow.write(content.toString());
+		ow.close();
+	}
+	
+	public void transferFile2UTF8(String srcFileName, String destFileName)
+			throws IOException {
+		String line_separator = System.getProperty("line.separator");
+		FileInputStream fis = new FileInputStream(srcFileName);
+		StringBuffer content = new StringBuffer();
+		DataInputStream in = new DataInputStream(fis);
+		BufferedReader d = new BufferedReader(
+				new InputStreamReader(in, "GBK"));// , "UTF-8"
+		String line = null;
+		while ((line = d.readLine()) != null)
+			content.append(line);
+		d.close();
+		in.close();
+		fis.close();
+
+		Writer ow = new OutputStreamWriter(new FileOutputStream(destFileName),
+				"UTF-8");
 		ow.write(content.toString());
 		ow.close();
 	}

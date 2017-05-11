@@ -127,7 +127,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 		chnCollectBatch.setOperatorcode(messageHead.getOperator());
 		chnCollectBatch.setOrigbatchno(collectionChargesBean.getBatchNo());
 		
-		ChnCollectBatchDO batch;
+		ChnCollectBatchDO batch = null;
 		try {
 			batch = chnCollectBatchDAO.saveCollectBatch(chnCollectBatch);
 		} catch (Exception e) {
@@ -185,6 +185,8 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			PayPartyBean payPartyBean = new PayPartyBean();
 			payPartyBean.setPayordno(cmt031Bean.getTxId());
 			payPartyBean.setTxnseqno(detaBean.getTxnseqno());
+			payPartyBean.setPayfirmerno(collectionChargesBean.getSenderCode());
+			
 			txnsLogDAO.updatePayInfo(payPartyBean);
 			txnsLogDAO.updateTradeStatFlag(detaBean.getTxnseqno(), TradeStatFlagEnum.PAYING);
 		}
@@ -291,6 +293,7 @@ public class BusinesssMessageSenderImpl implements BusinesssMessageSender{
 			PayPartyBean payPartyBean = new PayPartyBean();
 			payPartyBean.setPayordno(cmt036Bean.getTxId());
 			payPartyBean.setTxnseqno(detaBean.getTxnseqno());
+			payPartyBean.setPayfirmerno(paymentBean.getSenderCode());
 			txnsLogDAO.updatePayInfo(payPartyBean);
 			txnsLogDAO.updateTradeStatFlag(detaBean.getTxnseqno(), TradeStatFlagEnum.PAYING);
 		}

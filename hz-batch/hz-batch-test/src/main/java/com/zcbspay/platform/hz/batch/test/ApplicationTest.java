@@ -32,6 +32,7 @@ public class ApplicationTest extends BaseTest {
 		String download_bill_date = RESOURCE.getString("download_bill_date");
 		String sign_in_out = RESOURCE.getString("sign_in_out");
 		String merchno = RESOURCE.getString("debtorunitcode");
+		String billType = RESOURCE.getString("billtype");
 		if(StringUtils.isNotEmpty(collect_tn)){
 			//批量代收
 			test_batch_collect(collect_tn);
@@ -42,8 +43,14 @@ public class ApplicationTest extends BaseTest {
 		}
 		if(StringUtils.isNotEmpty(download_bill_date)){
 			//下载对账文件
-			test_download_bill(download_bill_date,"01",merchno);
-			test_download_bill(download_bill_date,"02",merchno);
+			if("01".equals(billType)){
+				test_download_bill(download_bill_date,"01",merchno);
+			}
+			if("02".equals(billType)){
+				test_download_bill(download_bill_date,"02",merchno);
+			}
+			
+			
 		}
 		if(StringUtils.isNotEmpty(sign_in_out)){
 			test_sign_in_out(sign_in_out);

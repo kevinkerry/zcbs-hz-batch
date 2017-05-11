@@ -75,10 +75,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 			throw new HZBatchApplicationException("HZB002");
 		}
 		List<OrderCollectDetaDO> detaOrderList = orderCollectDetaDAO.getDetaListByBatchtid(orderCollectBatch.getTid());
-		MerchantBean merchantBean = merchService.getMerchBymemberId(orderCollectBatch.getMerid());
-		if(StringUtils.isEmpty(merchantBean.getChargingunit())){
-			throw new HZBatchApplicationException("HZB005");
-		}
+		
 		HzAgencyInfoDO agencyInfo = hzAgencyInfoDAO.getAgencyInfo(orderCollectBatch.getMerid(), "11000003");
 		String senderCode = agencyInfo.getChargingunit();
 		for(OrderCollectDetaDO collectDeta : detaOrderList){
@@ -86,7 +83,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 				continue;
 			}
 			CollectionChargesDetaBean detaBean = new CollectionChargesDetaBean();
-			detaBean.setDebtorUnitCode(merchantBean.getChargingunit());//从商户表中获取，暂时没有此字段,查询处理
+			detaBean.setDebtorUnitCode(agencyInfo.getChargingunit());//从商户表中获取，暂时没有此字段,查询处理
 			detaBean.setCommitDate(DateUtil.getCurrentDate());
 			detaBean.setDebtorBranchNo(collectDeta.getDebtorbank());//出帐银行号
 			detaBean.setDebtorAccountNo(collectDeta.getDebtoraccount());
@@ -95,7 +92,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 			detaBean.setCreditorAccountNo(collectDeta.getCreditoraccount());
 			detaBean.setCurrencyCode("RMB");
 			detaBean.setAmount(collectDeta.getAmt());
-			
+			//获取合同信息
 			ContractDO contract = contractDAO.getContract(orderCollectBatch.getMerid(), collectDeta.getDebtorconsign());
 			if(contract!=null){
 				senderCode = contract.getCategoryPurpose();
@@ -164,7 +161,7 @@ public class ConcentrateTradeServiceImpl implements ConcentrateTradeService {
 				continue;
 			}
 			PaymentDetaBean detaBean = new PaymentDetaBean();
-			detaBean.setDebtorUnitCode(merchantBean.getChargingunit());
+			detaBean.setDebtorUnitCode(agencyInfo.getChargingunit());
 			detaBean.setCommitDate(DateUtil.getCurrentDate());
 			detaBean.setCreditorBranchCode(orderDeta.getCreditorbank());
 			detaBean.setCreditorAccountNo(orderDeta.getCreditoraccount());

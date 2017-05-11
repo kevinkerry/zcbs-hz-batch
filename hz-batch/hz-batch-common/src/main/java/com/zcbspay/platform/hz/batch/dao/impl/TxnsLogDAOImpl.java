@@ -96,9 +96,8 @@ public class TxnsLogDAOImpl extends HibernateBaseDAOImpl<TxnsLogDO> implements
 		Query query = getSession().createQuery(hql);
 		query.setParameter(0, payPartyBean.getPayordno());
 		query.setParameter(1, Constant.getInstance().getChannelCode());
-		query.setParameter(2, Constant.getInstance().getSenderCode());
+		query.setParameter(2, payPartyBean.getPayfirmerno());
 		query.setParameter(3, DateUtil.getCurrentDateTime());
-		
 		query.setParameter(4, payPartyBean.getTxnseqno());
 		int rows = query.executeUpdate();
 		log.info("updatePayInfo() effect rows:" + rows);
